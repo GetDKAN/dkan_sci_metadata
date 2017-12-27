@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * dkan_sci_metadata.install
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function dkan_sci_metadata_install() {
+  $features_to_revert = array(
+    'dkan_sci_metadata',
+  );
+  foreach ($features_to_revert as $feature_name) {
+    $feature = features_get_features($feature_name);
+    $components = array_keys($feature->info['features']);
+    features_revert(array($feature_name => $components));
+  }
+
+  $vocabulary = dkan_sci_metadata_taxonomy_fixtures_vocabulary();
+  taxonomy_fixtures_import_terms($vocabulary);
+
+  $t = get_t();
+  drupal_set_message(
+    $t('Author ID Type imported.'),
+    'status'
+  );
+}
