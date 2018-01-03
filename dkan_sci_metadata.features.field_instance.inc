@@ -185,7 +185,7 @@ function dkan_sci_metadata_field_default_field_instances() {
   t('Author ID');
   t('Author Name');
   t('Check if this is an organization');
-  t('Enter an ORCID identifier for the author if one is available.');
+  t('Enter an identifier for the author if one is available.');
   t('Is Organization');
   t('Last, First e.g. Doe, John');
 
