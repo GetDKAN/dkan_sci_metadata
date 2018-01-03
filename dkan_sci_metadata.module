@@ -85,24 +85,28 @@ function dkan_sci_metadata_node_validate($node, $form, &$form_state) {
 function dkan_sci_metadata_entity_presave($entity, $type) {
   // Populate author name field.
   if ($type == 'paragraphs_item' && $entity->field_name == 'field_metadata_extended') {
-    $author_id_type_field = $entity->field_sci_author_id_type[LANGUAGE_NONE];
-    $author_id_field = $entity->field_sci_author_id[LANGUAGE_NONE];
+    switch ($entity->bundle) {
+      case 'sci_author':
+        $author_id_type_field = $entity->field_sci_author_id_type[LANGUAGE_NONE];
+        $author_id_field = $entity->field_sci_author_id[LANGUAGE_NONE];
 
-    if (count($author_id_type_field) && count($author_id_field)) {
-      $author_id_type_tid = strtolower($author_id_type_field[0]['tid']);
-      $term = taxonomy_term_load($author_id_type_tid);
-      $author_id_type = $term->name;
-      $author_id = $author_id_field[0]['value'];
+        if (count($author_id_type_field) && count($author_id_field)) {
+          $author_id_type_tid = strtolower($author_id_type_field[0]['tid']);
+          $term = taxonomy_term_load($author_id_type_tid);
+          $author_id_type = $term->name;
+          $author_id = $author_id_field[0]['value'];
 
-      switch ($author_id_type) {
-        // Populate author name from ORCID biography data.
-        case DkanSciMetadataAuthorOrcid::AUTHOR_TAXONOMY_NAME:
-          // Only replace blank author names.
-          if (!count($entity->field_sci_author_name[LANGUAGE_NONE])) {
-            $entity->field_sci_author_name[LANGUAGE_NONE][0]['value'] = DkanSciMetadataAuthorOrcid::getName($author_id);
+          switch ($author_id_type) {
+            // Populate author name from ORCID biography data.
+            case DkanSciMetadataAuthorOrcid::AUTHOR_TAXONOMY_NAME:
+              // Only replace blank author names.
+              if (!count($entity->field_sci_author_name[LANGUAGE_NONE])) {
+                $entity->field_sci_author_name[LANGUAGE_NONE][0]['value'] = DkanSciMetadataAuthorOrcid::getName($author_id);
+              }
+              break;
           }
-          break;
-      }
+        }
+        break;
     }
   }
 }
