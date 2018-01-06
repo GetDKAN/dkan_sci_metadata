@@ -23,6 +23,11 @@ function dkan_sci_metadata_paragraphs_info() {
       'bundle' => 'sci_author',
       'locked' => '1',
     ),
+    'sci_review' => array(
+      'name' => 'Review',
+      'bundle' => 'sci_review',
+      'locked' => '1',
+    ),
     'sci_purpose_methods' => array(
       'name' => 'Science Purpose / Methods',
       'bundle' => 'sci_purpose_methods',

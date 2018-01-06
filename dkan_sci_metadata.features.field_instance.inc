@@ -179,6 +179,103 @@ function dkan_sci_metadata_field_default_field_instances() {
       'weight' => 1,
     ),
   );
+  // Exported field_instance:
+  // 'paragraphs_item-sci_review-field_sci_peer_reviewed'.
+  $field_instances['paragraphs_item-sci_review-field_sci_peer_reviewed'] = array(
+    'bundle' => 'sci_review',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 1,
+      ),
+      'paragraphs_editor_preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'paragraphs_item',
+    'field_name' => 'field_sci_peer_reviewed',
+    'label' => 'Peer Reviewed',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 1,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 1,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'paragraphs_item-sci_review-field_sci_peer_reviewer'.
+  $field_instances['paragraphs_item-sci_review-field_sci_peer_reviewer'] = array(
+    'bundle' => 'sci_review',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'paragraphs',
+        'settings' => array(
+          'view_mode' => 'full',
+        ),
+        'type' => 'paragraphs_view',
+        'weight' => 0,
+      ),
+      'paragraphs_editor_preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'paragraphs_item',
+    'field_name' => 'field_sci_peer_reviewer',
+    'label' => 'Reviewer',
+    'required' => 0,
+    'settings' => array(
+      'add_mode' => 'button',
+      'allowed_bundles' => array(
+        'sci_author' => 'sci_author',
+        'sci_purpose_methods' => -1,
+        'sci_review' => -1,
+      ),
+      'bundle_weights' => array(
+        'sci_author' => 2,
+        'sci_purpose_methods' => 3,
+        'sci_review' => 4,
+      ),
+      'default_edit_mode' => 'open',
+      'title' => 'Reviewer',
+      'title_multiple' => 'Reviewers',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'paragraphs',
+      'settings' => array(),
+      'type' => 'paragraphs_embed',
+      'weight' => 0,
+    ),
+  );
 
   // Exported field_instance:
   // 'paragraphs_item-sci_purpose_methods-field_sci_equip_software_used'.
@@ -336,6 +433,8 @@ function dkan_sci_metadata_field_default_field_instances() {
   t('Is Organization');
   t('Last, First e.g. Doe, John');
   t('Name the equipment and software used to collect and process the data. Provide make and models, name and version number, and a stable URL for each tool used to collect and process the data. ');
+  t('Peer Reviewed');
+  t('Reviewer');
   t('Select the type of Author ID entered.');
   t('Use Limitations');
 
