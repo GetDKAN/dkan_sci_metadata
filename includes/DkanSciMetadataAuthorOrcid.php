@@ -23,7 +23,7 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
     $exp = '/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}\-([0-9]{4}|[0-9]{3}X)$/';
     if (!preg_match($exp, $id)) {
       return t(
-        'Author ORCID value must be of the @form form',
+        'ORCID value must be of the @form form',
         array(
           '@form' => '0000-0002-8870-7099',
         )
@@ -33,7 +33,7 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
       // If regex validation pass, then do a search against the orcid api.
       $search = self::query($id);
       if (!isset($search['orcid-profile'])) {
-        return t('Author ORCID ID @id does not exists according to the orcid.org API', array('@id' => $id));
+        return t('ORCID ID @id does not exists according to the orcid.org API', array('@id' => $id));
       }
     }
     return NULL;
