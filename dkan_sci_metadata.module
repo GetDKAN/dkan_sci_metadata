@@ -36,39 +36,22 @@ function dkan_sci_metadata_node_validate($node, $form, &$form_state) {
         if (is_numeric($key)) {
           if (
             isset($value['#entity']) &&
-            isset($value['#entity']->bundle) &&
-            $value['#entity']->bundle == DkanSciMetadataAuthor::AUTHOR_BUNDLE
+            isset($value['#bundle']) &&
+            (
+              $value['#bundle'] == DkanSciMetadataAuthor::AUTHOR_BUNDLE ||
+              $value['#bundle'] == 'sci_review'
+            )
           ) {
-            $author_id_type = NULL;
-            $author_id = NULL;
-
-            if (
-              isset($value['field_sci_author_name'][LANGUAGE_NONE][0]['value']['#value']) &&
-              !empty($value['field_sci_author_name'][LANGUAGE_NONE][0]['value']['#value'])
-            ) {
-              // @todo Enforce last, first name format.
+            if ($value['#bundle'] == DkanSciMetadataAuthor::AUTHOR_BUNDLE) {
+              // Validate on this paragraphs item.
+              _dkan_sci_metadata_validate_sci_author($value, $key);
             }
-            else {
-              // Validate author ID if possible.
-              $author_id_type_field = $value['field_sci_author_id_type'][LANGUAGE_NONE];
-              $author_id_field = $value['field_sci_author_id'][LANGUAGE_NONE];
-
-              if (isset($author_id_type_field)) {
-                $author_id_type = strtolower($author_id_type_field['#options'][$author_id_type_field['#value']]);
-              }
-              if (isset($author_id_field)) {
-                $author_id = $author_id_field[0]['value']['#value'];
-              }
-
-              if (!empty($author_id_type) && !empty($author_id)) {
-                switch ($author_id_type) {
-                  case DkanSciMetadataAuthorOrcid::AUTHOR_ID_TYPE:
-                    // Validate ORCID author ID.
-                    $error_msg = DkanSciMetadataAuthorOrcid::validate($author_id);
-                    if (!empty($error_msg)) {
-                      form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $key . '][field_sci_author_id', $error_msg);
-                    }
-                    break;
+            elseif ($value['#bundle'] == 'sci_review') {
+              // Sci_review can contain multiple authors, needs iteration.
+              foreach ($value['field_sci_peer_reviewer'][LANGUAGE_NONE] as $reviewer_key => $reviewer_value) {
+                if (is_numeric($reviewer_key)) {
+                  $form_key = $key . '][field_sci_peer_reviewer][' . LANGUAGE_NONE . '][' . $reviewer_key;
+                  _dkan_sci_metadata_validate_sci_author($reviewer_value, $form_key);
                 }
               }
             }
@@ -87,24 +70,23 @@ function dkan_sci_metadata_entity_presave($entity, $type) {
   if ($type == 'paragraphs_item' && $entity->field_name == 'field_metadata_extended') {
     switch ($entity->bundle) {
       case 'sci_author':
-        $author_id_type_field = $entity->field_sci_author_id_type[LANGUAGE_NONE];
-        $author_id_field = $entity->field_sci_author_id[LANGUAGE_NONE];
+        _dkan_sci_metadata_populate_name($entity);
+        break;
 
-        if (count($author_id_type_field) && count($author_id_field)) {
-          $author_id_type_tid = strtolower($author_id_type_field[0]['tid']);
-          $term = taxonomy_term_load($author_id_type_tid);
-          $author_id_type = $term->name;
-          $author_id = $author_id_field[0]['value'];
+      case 'sci_review':
+        $reviewers = $entity->field_sci_peer_reviewer[LANGUAGE_NONE];
+        if ($reviewers) {
+          foreach ($reviewers as $reviewer_item) {
+            $reviewer_entity = paragraphs_item_load($reviewer_item['value']);
+            _dkan_sci_metadata_populate_name($reviewer_entity);
 
-          switch ($author_id_type) {
-            // Populate author name from ORCID biography data.
-            case DkanSciMetadataAuthorOrcid::AUTHOR_TAXONOMY_NAME:
-              // Only replace blank author names.
-              if (!count($entity->field_sci_author_name[LANGUAGE_NONE])) {
-                $entity->field_sci_author_name[LANGUAGE_NONE][0]['value'] = DkanSciMetadataAuthorOrcid::getName($author_id);
-              }
-              break;
+            $reviewer_entity->save(TRUE);
           }
+          // Set Peer Reviewed flag when a reviewer is added.
+          $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 1;
+        }
+        else {
+          $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 0;
         }
         break;
     }
@@ -197,6 +179,99 @@ function dkan_sci_metadata_panels_pre_render(&$display, $renderer) {
   }
 }
 
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function dkan_sci_metadata_field_widget_form_alter(&$element, &$form_state, $context) {
+  if (isset($element['#field_name']) && $element['#field_name'] == 'field_sci_peer_reviewer') {
+    // Replace "Add Science Author" with "Add Reviewer"
+    $element['add_more']['add_more_bundle_sci_author']['#value'] = 'Add Reviewer';
+  }
+  elseif ($element['#entity_type'] == 'paragraphs_item') {
+    if ($context['form']['#bundle'] == 'sci_review') {
+      // Replace all titles/descriptions from Author to Reviewer, preserve case.
+      $element['#title'] = preg_replace("/author/", "reviewer", $element['#title']);
+      $element['#title'] = preg_replace("/Author/", "Reviewer", $element['#title']);
+      $element['#description'] = preg_replace("/author/", "reviewer", $element['#description']);
+      $element['#description'] = preg_replace("/Author/", "Reviewer", $element['#description']);
+
+      if (isset($element['value'])) {
+        $element['value']['#title'] = preg_replace("/author/", "reviewer", $element['value']['#title']);
+        $element['value']['#title'] = preg_replace("/Author/", "Reviewer", $element['value']['#title']);
+        $element['value']['#description'] = preg_replace("/author/", "reviewer", $element['value']['#description']);
+        $element['value']['#description'] = preg_replace("/Author/", "Reviewer", $element['value']['#description']);
+      }
+    }
+  }
+}
+
+  /**
+   * Validate Science Author form item.
+   *
+   * @param array $value
+   *   Form array of sci_author paragraph item.
+   */
+function _dkan_sci_metadata_validate_sci_author($value, $form_key) {
+  $author_id_type = NULL;
+  $author_id = NULL;
+
+  if (
+    isset($value['field_sci_author_name'][LANGUAGE_NONE][0]['value']['#value']) &&
+    !empty($value['field_sci_author_name'][LANGUAGE_NONE][0]['value']['#value'])
+  ) {
+    // @todo Enforce last, first name format.
+  }
+  // Validate author ID if possible.
+  $author_id_type_field = $value['field_sci_author_id_type'][LANGUAGE_NONE];
+  $author_id_field = $value['field_sci_author_id'][LANGUAGE_NONE];
+
+  if (isset($author_id_type_field)) {
+    $author_id_type = strtolower($author_id_type_field['#options'][$author_id_type_field['#value']]);
+  }
+  if (isset($author_id_field)) {
+    $author_id = $author_id_field[0]['value']['#value'];
+  }
+
+  if (!empty($author_id_type) && !empty($author_id)) {
+    switch ($author_id_type) {
+      case DkanSciMetadataAuthorOrcid::AUTHOR_ID_TYPE:
+        // Validate ORCID author ID.
+        $error_msg = DkanSciMetadataAuthorOrcid::validate($author_id);
+        if (!empty($error_msg)) {
+          form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key . '][field_sci_author_id', $error_msg);
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Populate name field in sci_author paragraph entity item.
+ *
+ * @param object $entity
+ *   Sci Author Paragraphs Item Entity
+ */
+function _dkan_sci_metadata_populate_name(&$entity) {
+  $author_id_type_field = $entity->field_sci_author_id_type[LANGUAGE_NONE];
+  $author_id_field = $entity->field_sci_author_id[LANGUAGE_NONE];
+
+  if (count($author_id_type_field) && count($author_id_field)) {
+    $author_id_type_tid = strtolower($author_id_type_field[0]['tid']);
+    $term = taxonomy_term_load($author_id_type_tid);
+    $author_id_type = $term->name;
+    $author_id = $author_id_field[0]['value'];
+
+    switch ($author_id_type) {
+      // Populate author name from ORCID biography data.
+      case DkanSciMetadataAuthorOrcid::AUTHOR_TAXONOMY_NAME:
+        // Only replace blank author names.
+        if (!count($entity->field_sci_author_name[LANGUAGE_NONE])) {
+          $entity->field_sci_author_name[LANGUAGE_NONE][0]['value'] = DkanSciMetadataAuthorOrcid::getName($author_id);
+        }
+        break;
+    }
+  }
+}
 /**
  * Enables facets for author fields.
  */
