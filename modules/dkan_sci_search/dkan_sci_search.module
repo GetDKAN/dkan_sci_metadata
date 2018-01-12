@@ -1,0 +1,161 @@
+<?php
+
+/**
+ * @file
+ * Code for the DKAN Science Search feature.
+ */
+
+include_once 'dkan_sci_search.features.inc';
+
+/**
+ * Implements hook_file_insert().
+ */
+function dkan_sci_search_file_insert($file) {
+  // Add the xml data to the file when we create.
+  _dkan_sci_search_file_process($file);
+}
+
+/**
+ * Extracts file content.
+ *
+ * @param object $file
+ *   The file object.
+ *
+ * @return string
+ */
+function _dkan_sci_search_file_process($file) {
+  // Make sure we have an xml file.
+  $validate = file_validate_extensions($file, 'xml');
+  if (empty($validate)) {
+    // Add file contents for use in solr search results.
+    // We need to load the newly created file to grab the contents.
+    $file = file_load($file->fid);
+    $uri = $file->uri;
+    $fhandle = fopen($uri, 'r');
+    $string = fread($fhandle, filesize($uri));
+    // Pull out the xml tags.
+    $xml = new SimpleXMLElement($string);
+    $text = strip_tags($xml->asXML());
+    $file->metadata['xml_data'] = $text;
+    file_save($file);
+    fclose($fhandle);
+    return $text;
+  }
+  return '';
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ */
+function dkan_sci_search_form_metadata_node_form_alter(&$form, &$form_state, $form_id) {
+  array_unshift($form['actions']['submit']['#submit'], 'dkan_sci_search_form_metadata_node_form_submit');
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ */
+function dkan_sci_search_form_metadata_node_form_submit(&$form, &$form_state) {
+  $xml = '';
+  if (!empty($form_state['complete form']['field_metadata_file'][LANGUAGE_NONE][0]['#file']->metadata['xml_data'])) {
+    if (!empty($form_state['values']['field_dataset_metadata_ref'][LANGUAGE_NONE][0]['target_id'])) {
+      $xml = $form_state['complete form']['field_metadata_file'][LANGUAGE_NONE][0]['#file']->metadata['xml_data'];
+      $node = node_load($form_state['values']['field_dataset_metadata_ref'][LANGUAGE_NONE][0]['target_id']);
+      $node->field_file_content[LANGUAGE_NONE][0]['value'] = $xml;
+      node_save($node);
+    }
+  }
+}
+
+/**
+ * Enables facets for author fields.
+ */
+function _dkan_sci_search_enable_facets() {
+  $searchers = array('search_api@dkan_sci_search');
+  foreach ($searchers as $searcher) {
+    $realm = "block";
+    $facets_to_enable = array('field_metadata_extended:field_sci_author_name', 'field_metadata_extended:field_sci_author_id_type:name');
+
+    $adapter = facetapi_adapter_load($searcher);
+    $facet_info = facetapi_get_facet_info($searcher);
+
+    foreach (array_keys($facet_info) as $item) {
+      $facet = facetapi_facet_load($item, $searcher);
+      if (in_array($item, $facets_to_enable)) {
+        $facet_settings = $adapter->getFacet($facet)->getSettings($realm);
+        $facet_settings->enabled = 1;
+        ctools_export_crud_save('facetapi', $facet_settings);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_environment_switch().
+ */
+function dkan_sci_search_environment_switch(
+  $target_env,
+  $current_env,
+  $workflow = NULL
+) {
+  _dkan_sci_search_enable_facets();
+}
+
+/**
+ * Implements hook_panels_pre_render().
+ */
+function dkan_sci_search_panels_pre_render(&$display, $renderer) {
+  // Add Filter by Author Name facet.
+  if (is_numeric(strpos($display->cache_key, 'page-datasets'))) {
+    $map = facetapi_get_delta_map();
+    $realms = array();
+    foreach ($map as $machine_name => $facet) {
+      $facet_keys = explode(':', $facet);
+      // Decode encoded :'s.
+      array_walk($facet_keys, function (&$val) {
+        $val = urldecode($val);
+      });
+      if (in_array('search_api@dkan_sci_search', $facet_keys)) {
+        if (in_array('field_metadata_extended:field_sci_author_name', $facet_keys)) {
+          $realms['field_sci_author_name'] = 'facetapi-' . $machine_name;
+        }
+      }
+    }
+    if ($realms) {
+      foreach ($realms as $field => $machine_name) {
+        $title = '';
+        $pane = panels_new_pane('block', $machine_name, TRUE);
+        $pane->uuid = ctools_uuid_generate();
+        $pane->pid = 'new-' . $pane->uuid;
+        $pane->panel = 'sidebar';
+        $pane->subtype = $machine_name;
+        unset($pane->did);
+        $pane->shown = TRUE;
+
+        switch ($field) {
+          case 'field_sci_author_name':
+            $title = 'Filter by Author Name';
+            break;
+        }
+        $pane->configuration = array(
+          'override_title' => TRUE,
+          'override_title_heading' => 'h2',
+          'override_title_text' => $title,
+        );
+        $pane->css = array(
+          'css_id' => '',
+          'css_class' => 'pane-facetapi pane-block',
+        );
+        $pane->style = array(
+          'settings' => array(
+            'pane_title' => '%title',
+            'pane_collapsed' => TRUE,
+            'pane_empty_check' => FALSE,
+          ),
+          'style' => 'collapsible',
+        );
+        $display->panels['sidebar'][] = $pane->pid;
+        $display->content[$pane->pid] = $pane;
+      }
+    }
+  }
+}
