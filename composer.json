@@ -1,0 +1,5 @@
+{
+    "require": {
+        "renanbr/crossref-client": "^1@dev"
+    }
+}
