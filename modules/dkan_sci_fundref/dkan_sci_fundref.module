@@ -1,0 +1,212 @@
+<?php
+/**
+ * @file
+ * Code for the DKAN Science FundRef feature.
+ */
+
+include drupal_get_path('module', 'dkan_sci_metadata') . '/vendor/autoload.php';
+include_once 'dkan_sci_fundref.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function dkan_sci_fundref_menu() {
+  $items['dkan_sci_fundref/funder_autocomplete'] = array(
+    'title' => 'Autocomplete FundRef Funder',
+    'page callback' => '_dkan_sci_fundref_funder_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['dkan_sci_fundref/funder_search/%'] = array(
+    'title' => 'Search FundRef for Funder Info',
+    'page callback' => '_dkan_sci_fundref_funder_search',
+    'page arguments' => array(2, '1', TRUE),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['dkan_sci_fundref/funder_lookup'] = array(
+    'title' => 'Lookup FundRef by DOI URL for Funder Info',
+    'page callback' => '_dkan_sci_fundref_funder_lookup',
+    'page arguments' => array(NULL, TRUE),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function dkan_sci_fundref_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'taxonomy_form_term' && $form['#bundle'] == 'dkan_sci_fundref') {
+    global $user;
+    $form['name']['#autocomplete_path'] = 'dkan_sci_fundref/funder_autocomplete';
+    drupal_add_js(drupal_get_path('module', 'dkan_sci_fundref') . '/js/dkan_sci_fundref.js', array('scope' => 'footer'));
+
+    $form['name']['#description'] = t('Enter a search string and select funder from autocomplete dropdown');
+
+    if (!in_array('administrator', $user->roles)) {
+      // Hide extra fields from non-administrators.
+      $form['description']['#access'] = FALSE;
+      $form['redirect']['#access'] = FALSE;
+      $form['relations']['#access'] = FALSE;
+      $form['#after_build'][] = '_dkan_sci_fundref_after_build';
+    }
+    $form['#validate'][] = '_dkan_sci_fundref_taxonomy_validate';
+  }
+}
+
+/**
+ * After build function to hide path section.
+ *
+ * @param array $form
+ *   Form array
+ * @param array $form_state
+ *   Form state array
+ *
+ * @return array
+ *   Altered form array
+ */
+function _dkan_sci_fundref_after_build($form, &$form_state) {
+  if ($form['#form_id'] == 'taxonomy_form_term' && $form['#bundle'] == 'dkan_sci_fundref') {
+    // Hide the URL Alias section.
+    $form['path']['#access'] = FALSE;
+  }
+  return $form;
+}
+
+/**
+ * Custom form validation for FundRef DOI URL.
+ *
+ * @param array $form
+ *   Form Array
+ * @param array $form_state
+ *   Form State Array
+ */
+function _dkan_sci_fundref_taxonomy_validate($form, &$form_state) {
+  $doi_url = $form_state['values']['field_dkan_sci_fundref_doi'][LANGUAGE_NONE][0]['url'];
+  if (!_dkan_sci_fundref_is_valid_doi_url($doi_url)) {
+    form_set_error('field_dkan_sci_fundref_doi', 'DOI URL not in the format http://dx.doi.org/12.34567/1234567');
+  }
+}
+
+/**
+ * Check if URL is a valid DOI URL.
+ *
+ * @param string $doi_url
+ *   DOI URL to check
+ *
+ * @return bool
+ *   TRUE if valid, FALSE otherwise.
+ */
+function _dkan_sci_fundref_is_valid_doi_url($doi_url) {
+  return (bool) preg_match('/http:\/\/dx\.doi\.org\/.+\/.+/', $doi_url);
+}
+
+/**
+ * Page callback: Outputs JSON for fundref autocomplete suggestions.
+ *
+ * @param string $term
+ *   The funder name to query.
+ */
+function _dkan_sci_fundref_funder_autocomplete($term) {
+  $term_matches = array();
+  $funders = _dkan_sci_fundref_funder_search($term);
+  if ($funders) {
+    $term_matches = array_map(
+      function ($item) {
+        return $item['name'];
+      },
+      $funders
+    );
+    $term_matches = array_combine($term_matches, $term_matches);
+  }
+  drupal_json_output($term_matches);
+}
+
+/**
+ * Get Funder Info from CrossRef API for a term.
+ *
+ * @param string $term
+ *   Funder name to search
+ * @param int $max_results
+ *   Max results to return
+ * @param bool $json_output
+ *   If TRUE, will output JSON otherwise return an array.
+ *
+ * @return mixed
+ *   Array of funder info or NULL
+ */
+function _dkan_sci_fundref_funder_search($term, $max_results = 10, $json_output = FALSE) {
+  $funders = NULL;
+
+  if (!empty($term) && strlen($term) > 3) {
+    $client = new RenanBr\CrossRefClient();
+    $parameters = array(
+      'query' => $term,
+      'rows' => $max_results,
+    );
+    try {
+      $result = $client->request('funders', $parameters);
+    }
+    catch (Exception $e) {
+      // @todo Add exception handling.
+    }
+
+    if (!empty($result)) {
+      if (isset($result['message']) && count($result['message']['items'])) {
+        $funders = $result['message']['items'];
+      }
+    }
+  }
+  if ($json_output) {
+    drupal_json_output($funders);
+  }
+  else {
+    return $funders;
+  }
+  return NULL;
+}
+
+/**
+ * Get Funder Info from API for a term.
+ *
+ * @param string $doi_url
+ *   DOI URL to get funder info for
+ * @param bool $json_output
+ *   If TRUE, will output JSON otherwise return an array.
+ *
+ * @return mixed
+ *   Array of funder info or NULL
+ */
+function _dkan_sci_fundref_funder_lookup($doi_url = '', $json_output = FALSE) {
+  $funder = NULL;
+
+  if (empty($doi_url)) {
+    $doi_url = urldecode($_GET['doi_url']);
+  }
+
+  if (_dkan_sci_fundref_is_valid_doi_url($doi_url)) {
+    $client = new RenanBr\CrossRefClient();
+    $url_parts = parse_url($doi_url);
+    list($junk, $owner_id, $doi_id) = explode('/', $url_parts['path']);
+
+    try {
+      $result = $client->request('funders' . $url_parts['path']);
+      if (!empty($result)) {
+        $funder = $result['message'];
+      }
+    }
+    catch (Exception $e) {
+      // @todo Add exception handling.
+    }
+
+    if ($json_output) {
+      drupal_json_output($funder);
+    }
+    else {
+      return $funder;
+    }
+  }
+  return NULL;
+}
