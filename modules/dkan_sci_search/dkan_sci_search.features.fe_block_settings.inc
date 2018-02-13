@@ -66,33 +66,6 @@ function dkan_sci_search_default_fe_block_settings() {
     'visibility' => 0,
   );
 
-  $export['facetapi-S1UOZGxHcdgLDtZaE4EL8f74GzrzoY3q'] = array(
-    'cache' => -1,
-    'css_class' => '',
-    'custom' => 0,
-    'delta' => 'S1UOZGxHcdgLDtZaE4EL8f74GzrzoY3q',
-    'module' => 'facetapi',
-    'node_types' => array(),
-    'pages' => '',
-    'roles' => array(),
-    'themes' => array(
-      'nuboot_radix' => array(
-        'region' => '',
-        'status' => 0,
-        'theme' => 'nuboot_radix',
-        'weight' => 0,
-      ),
-      'usda_radix_theme' => array(
-        'region' => '',
-        'status' => 0,
-        'theme' => 'usda_radix_theme',
-        'weight' => 0,
-      ),
-    ),
-    'title' => '',
-    'visibility' => 0,
-  );
-
   $export['facetapi-W8zNmAfGcDv9PHup7hV360kOJUcAN8MX'] = array(
     'cache' => -1,
     'css_class' => '',

@@ -73,7 +73,11 @@ function _dkan_sci_search_enable_facets() {
   $searchers = array('search_api@dkan_sci_search');
   foreach ($searchers as $searcher) {
     $realm = "block";
-    $facets_to_enable = array('field_metadata_extended:field_sci_author_name', 'field_metadata_extended:field_sci_author_id_type:name');
+    $facets_to_enable = array(
+      'field_metadata_extended:field_sci_author_name',
+      'field_metadata_extended:field_sci_author_id_type:name',
+      'field_metadata_extended:field_sci_fundref',
+    );
 
     $adapter = facetapi_adapter_load($searcher);
     $facet_info = facetapi_get_facet_info($searcher);
@@ -157,5 +161,20 @@ function dkan_sci_search_panels_pre_render(&$display, $renderer) {
         $display->content[$pane->pid] = $pane;
       }
     }
+  }
+}
+
+/**
+ * Implements hook_default_search_api_index_alter().
+ */
+function dkan_sci_search_default_search_api_index_alter(&$data) {
+  if (isset($data['datasets'])) {
+    $data['datasets']->options['fields']['field_metadata_extended:field_sci_author_id_type:name'] = array(
+      'type' => 'list<string>',
+    );
+    $data['dkan_sci_search']->options['fields']['field_metadata_extended:field_sci_fundref'] = array(
+      'type' => 'list<string>',
+      'entity_type' => 'taxonomy_term',
+    );
   }
 }
