@@ -1,0 +1,254 @@
+<?php
+
+/**
+ * @file
+ * Code for the DKAN Science Metadata - Citation feature.
+ */
+
+include drupal_get_path('module', 'dkan_sci_metadata') . '/vendor/autoload.php';
+include_once 'dkan_sci_citation.features.inc';
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function dkan_sci_citation_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'form_alter') {
+    $group = $implementations['dkan_sci_citation'];
+    unset($implementations['dkan_sci_citation']);
+    $implementations['dkan_sci_citation'] = $group;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function dkan_sci_citation_form_alter(&$form, &$form_state, $form_id) {
+  if (array_key_exists('field_metadata_extended', $form)) {
+    $citation = FALSE;
+    $field_language = $form['field_metadata_extended']['#language'];
+
+    // Check to see if at least one of the paragraphs is a citation.
+    foreach (element_children($form['field_metadata_extended'][$field_language]) as $key) {
+      $element = $form['field_metadata_extended'][$field_language][$key];
+
+      if ($element['#bundle'] === 'sci_citation') {
+        $citation = TRUE;
+      }
+    }
+
+    if ($citation) {
+      // Attach custom js to handle states for citation paragraphs.
+      $form['#after_build'][] = '_dkan_sci_citation_states';
+    }
+  }
+}
+
+/**
+ * Implements hook_node_validate().
+ */
+function dkan_sci_citation_node_validate($node, $form, &$form_state) {
+  if ($form['type']['#value'] === 'dataset') {
+    // Validate extended metadata fields.
+    if (count($form['field_metadata_extended'][LANGUAGE_NONE])) {
+      foreach ($form['field_metadata_extended'][LANGUAGE_NONE] as $key => $value) {
+        if (is_numeric($key)) {
+          if (isset($value['#entity']) && isset($value['#bundle']) &&
+            $value['#bundle'] === 'sci_citation') {
+            _dkan_sci_citation_validate_sci_citation($value, $key);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Validate Citation form items.
+ *
+ * @param array $value
+ *   Form array of sci_citation paragraph item.
+ */
+function _dkan_sci_citation_validate_sci_citation($value, $form_key) {
+  $new_citation = ($value['#entity']->is_new) ? TRUE : FALSE;
+  $doi = $value['field_dkan_cite_doi'][LANGUAGE_NONE][0]['value']['#value'];
+  $bibtex = $value['field_dkan_cite_bibtex'][LANGUAGE_NONE][0]['value']['#value'];
+
+  $prev_doi = (!empty($value['#entity']->field_dkan_cite_doi[LANGUAGE_NONE][0]['value']))
+      ? $value['#entity']->field_dkan_cite_doi[LANGUAGE_NONE][0]['value'] : '';
+  $prev_bibtex = (!empty($value['#entity']->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value']))
+      ? $value['#entity']->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value'] : '';
+
+  if ($new_citation || ($prev_doi !== $doi) || ($prev_bibtex !== $bibtex)) {
+    if (!empty($doi)) {
+      if (!empty($bibtex)) {
+        // Values for DOI and Bibtex supplied.
+        $error_msg = t('Each Extended Metadata Citation is limited to a single lookup - either a DOI or Bibtex value.');
+        form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key, $error_msg);
+      }
+      else {
+        if (!_dkan_sci_citation_is_valid_doi($doi)) {
+          // Invalid DOI format.
+          $error_msg = t('DOI not in the format: 10.1000/123456.');
+          form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key. '][field_dkan_cite_doi', $error_msg);
+        }
+        else {
+          $citation = _dkan_sci_citation_process_doi($doi);
+          $json = json_decode($citation);
+          if (json_last_error() === JSON_ERROR_NONE) {
+            // Assign citation value.
+            // Currently handled by hook_entity_presave().
+          }
+          else {
+            // Error with DOI lookkup.
+            $error_msg = t('Error retrieving metadata for the supplied DOI.');
+            form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key. '][field_dkan_cite_doi', $error_msg);
+          }
+        }
+      }
+    }
+    elseif (empty($doi)) {
+      if (empty($bibtex)) {
+        $error_msg = t('Each Extended Metadata Citation requires at least one lookup - either a DOI or Bibtex value.');
+        form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key, $error_msg);
+      }
+      else {
+        // Process Bibtex.
+        $citation = _dkan_sci_citation_process_bibtex($bibtex);
+        $json = json_decode($citation);
+
+        if ($citation === 'multiples') {
+          // Too many bibtex items supplied.
+          $error_msg = t('Bibtex field may only contain one record per citation paragraph.');
+          form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key. '][field_dkan_cite_bibtex', $error_msg);
+        }
+        elseif (json_last_error() !== JSON_ERROR_NONE || is_null($citation)) {
+          // Error with bibtex processing.
+          $error_msg = t('Error processing supplied bibtex.');
+          form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key. '][field_dkan_cite_bibtex', $error_msg);
+        }
+        else {
+          // Assign citation value.
+          // Currently handled by hook_entity_presave().
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function dkan_sci_citation_entity_presave($entity, $type) {
+  if ($type === 'paragraphs_item' && $entity->field_name === 'field_metadata_extended') {
+    switch ($entity->bundle) {
+      case 'sci_citation':
+        $doi = (!empty($entity->field_dkan_cite_doi[LANGUAGE_NONE][0]['value']))
+            ? $entity->field_dkan_cite_doi[LANGUAGE_NONE][0]['value'] : '';
+        $bibtex = (!empty($entity->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value']))
+            ? $entity->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value'] : '';
+
+        if ($entity->is_new) {
+          if (!empty($doi)) {
+            $citation = _dkan_sci_citation_process_doi($doi);
+          }
+          else {
+            $citation = _dkan_sci_citation_process_bibtex($bibtex);
+          }
+
+          $entity->field_dkan_cite_data[LANGUAGE_NONE][0]['value'] = $citation;
+
+        }
+        else {
+          $original = $entity->original;
+          $original_doi = (!empty($original->field_dkan_cite_doi[LANGUAGE_NONE][0]['value']))
+              ? $original->field_dkan_cite_doi[LANGUAGE_NONE][0]['value'] : '';
+          $original_bibtex = (!empty($original->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value']))
+              ? $original->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value'] : '';
+
+          if (!empty($doi) && $doi !== $original_doi) {
+            $citation = _dkan_sci_citation_process_doi($doi);
+            $entity->field_dkan_cite_data[LANGUAGE_NONE][0]['value'] = $citation;
+          }
+          else if (!empty($bibtex) && $bibtex !== $original_bibtex) {
+            $citation = _dkan_sci_citation_process_bibtex($bibtex);
+            $entity->field_dkan_cite_data[LANGUAGE_NONE][0]['value'] = $citation;
+          }
+
+        }
+
+        break;
+    }
+  }
+}
+
+/**
+ * After build function to add custom js to enable/disable citation inputs.
+ *
+ * @param array $form
+ *   Form array
+ * @param array $form_state
+ *   Form state array
+ *
+ * @return array
+ *   Altered form array
+ */
+function _dkan_sci_citation_states($form, &$form_state) {
+  $path = drupal_get_path('module', 'dkan_sci_citation');
+  drupal_add_js("$path/js/dkan_sci_citation.js");
+  return $form;
+}
+
+function _dkan_sci_citation_process_doi($doi) {
+  $citation = NULL;
+  $client = new RenanBr\CrossRefClient();
+
+  try {
+    $work = $client->request('works/' . $doi);
+  }
+  catch (Exception $e) {
+    watchdog_exception('dkan_sci_metadata', $e, $message = NULL, $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL);
+  }
+
+  if (is_array($work)) {
+    $citation = json_encode($work);
+  }
+  else {
+    $citation = 'DOI Error';
+  }
+
+  return $citation;
+}
+
+function _dkan_sci_citation_process_bibtex($bibtex) {
+  $citation = NULL;
+  $client = new AudioLabs\BibtexParser\BibtexParser();
+
+  try {
+    $work = $client->parse_string($bibtex);
+  }
+  catch (Exception $e) {
+    watchdog_exception('dkan_sci_metadata', $e, $message = NULL, $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL);
+  }
+
+  if (count($work) > 1) {
+    $citation = 'multiples';
+  }
+  elseif (isset($work[0])) {
+    $citation = json_encode($work[0]);
+  }
+
+  return $citation;
+}
+
+/**
+ * Check if DIO is valid.
+ *
+ * @param string $doi
+ *   DOI to check
+ *
+ * @return bool
+ *   TRUE if valid, FALSE otherwise.
+ */
+function _dkan_sci_citation_is_valid_doi($doi) {
+  return (bool) preg_match('/10\..+\/.+/', $doi);
+}
