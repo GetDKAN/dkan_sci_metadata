@@ -4,7 +4,7 @@
  * Code for the DKAN Science FundRef feature.
  */
 
-include drupal_get_path('module', 'dkan_sci_metadata') . '/vendor/autoload.php';
+include drupal_get_path('module', 'dkan_sci_citation') . '/includes/vendor/autoload.php';
 include_once 'dkan_sci_fundref.features.inc';
 
 /**

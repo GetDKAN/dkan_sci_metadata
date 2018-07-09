@@ -20,6 +20,13 @@ function dkan_sci_search_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'pathauto_taxonomy_term_fundref_pattern';
+  $strongarm->value = '';
+  $export['pathauto_taxonomy_term_fundref_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'search_api_attachments_extracting_servlet_path';
   $strongarm->value = 'extract/tika';
   $export['search_api_attachments_extracting_servlet_path'] = $strongarm;

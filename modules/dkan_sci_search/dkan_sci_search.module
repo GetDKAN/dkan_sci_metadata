@@ -163,18 +163,3 @@ function dkan_sci_search_panels_pre_render(&$display, $renderer) {
     }
   }
 }
-
-/**
- * Implements hook_default_search_api_index_alter().
- */
-function dkan_sci_search_default_search_api_index_alter(&$data) {
-  if (isset($data['datasets'])) {
-    $data['datasets']->options['fields']['field_metadata_extended:field_sci_author_id_type:name'] = array(
-      'type' => 'list<string>',
-    );
-    $data['dkan_sci_search']->options['fields']['field_metadata_extended:field_sci_fundref'] = array(
-      'type' => 'list<string>',
-      'entity_type' => 'taxonomy_term',
-    );
-  }
-}

@@ -226,20 +226,32 @@ function _dkan_sci_metadata_enable_facets() {
 }
 
 /**
- * Implements hook_menu().
+ * Implements hook_field_formatter_info().
  */
-function dkan_sci_metadata_menu() {
-  $items['smm'] = array(
-    'title' => 'smm',
-    'page callback' => 'dkan_sci_metadata_smm',
-    'type' => MENU_CALLBACK,
-    'access arguments' => array('access content'),
+function dkan_sci_metadata_field_formatter_info() {
+  return array(
+    'render_as_link' => array(
+      'label' => t('Render textfield as link if the content is an url or email'),
+      'field types' => array('text', 'text_long', 'text_with_summary'),
+    ),
   );
-  return $items;
 }
 
-function dkan_sci_metadata_smm() {
-  include_once drupal_get_path('module', 'custom_config') . '/includes/MigrateSciMetadata.php';
-  $output = MigrateSciMetadata::migrate();
-  print ($output);
+/**
+ * Implements hook_field_formatter_view().
+ */
+function dkan_sci_metadata_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  switch ($display['type']) {
+    case 'render_as_link':
+      foreach ($items as $delta => $item) {
+        $output = $item['safe_value'];
+        if (filter_var($output, FILTER_VALIDATE_EMAIL) || filter_var($output, FILTER_VALIDATE_URL)) {
+          $output = check_markup($output);
+        }
+        $element[$delta] = array('#markup' => $output);
+      }
+      break;
+  }
+  return $element;
 }

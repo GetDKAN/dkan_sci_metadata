@@ -32,8 +32,8 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
     else {
       // If regex validation pass, then do a search against the orcid api.
       $search = self::query($id);
-      if (!isset($search['orcid-profile'])) {
-        return t('ORCID ID @id does not exists according to the orcid.org API', array('@id' => $id));
+      if (!isset($search['name'])) {
+        return t('Error validating ORCID ID @id. Please contact us if you believe the ORCID is valid.', array('@id' => $id));
       }
     }
     return NULL;
@@ -49,7 +49,7 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
    *   Array of ORCID data.
    */
   private static function query($id) {
-    $search = t('http://pub.orcid.org/v1.1/@orcid_id/orcid-bio', array('@orcid_id' => $id));
+    $search = t('https://pub.orcid.org/v2.1/@orcid_id/person', array('@orcid_id' => $id));
     $headers = array('Accept: application/orcid+json');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $search);
@@ -62,7 +62,7 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
   }
 
   /**
-   * Get Author's name from ORCID biography.
+   * Get Author's name from ORCID person entry.
    *
    * @param string $id
    *   ORCID ID
@@ -73,9 +73,8 @@ class DkanSciMetadataAuthorOrcid extends DkanSciMetadataAuthor {
   public static function getName($id) {
     $author_name = '';
     $search = self::query($id);
-    if (!empty($search) && isset($search['orcid-profile'])) {
-      $bio = $search['orcid-profile']['orcid-bio']['personal-details'];
-      $author_name = $bio['family-name']['value'] . ', ' . $bio['given-names']['value'];
+    if (!empty($search) && isset($search['name'])) {
+      $author_name = $search['name']['path'];
     }
     return $author_name;
   }
