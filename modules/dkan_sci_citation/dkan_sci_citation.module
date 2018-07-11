@@ -219,6 +219,18 @@ function dkan_sci_citation_field_display_alter(&$display, $context) {
   if ($context['field']['field_name'] === 'field_alt_object_id') {
     $context['instance']['label'] = 'PubAg';
   }
+
+  elseif (!empty($params['citation']) && $params['type'] === 'doi') {
+
+    $citation = _dkan_sci_citation_validate_doi($params['citation']);
+    $json_decode = json_decode($citation);
+    $json_save = json_encode($json_decode->message);
+    $processed = _dkan_sci_citation_process_data($json_save);
+
+    print $processed;
+  }
+
+  return '';
 }
 
 /**
