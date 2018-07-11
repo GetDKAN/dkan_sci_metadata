@@ -8,6 +8,9 @@
  * Implements hook_ctools_plugin_api().
  */
 function dkan_sci_metadata_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "field_group" && $api == "field_group") {
+    return array("version" => "1");
+  }
   if ($module == "strongarm" && $api == "strongarm") {
     return array("version" => "1");
   }
@@ -23,14 +26,9 @@ function dkan_sci_metadata_paragraphs_info() {
       'bundle' => 'sci_author',
       'locked' => '1',
     ),
-    'sci_review' => array(
-      'name' => 'Review',
-      'bundle' => 'sci_review',
-      'locked' => '1',
-    ),
-    'sci_purpose_methods' => array(
-      'name' => 'Science Purpose / Methods',
-      'bundle' => 'sci_purpose_methods',
+    'science_metadata' => array(
+      'name' => 'Science Metadata',
+      'bundle' => 'science_metadata',
       'locked' => '1',
     ),
   );

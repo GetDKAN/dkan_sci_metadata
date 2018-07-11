@@ -28,7 +28,7 @@ function dkan_sci_search_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 21,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -105,6 +105,8 @@ function dkan_sci_search_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('DOI');
+  t('Digital Object Identifier for Fundref. If no DOI is provided then the field is populated using the Founder name.');
   t('File content');
 
   return $field_instances;

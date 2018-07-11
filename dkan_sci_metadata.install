@@ -25,4 +25,24 @@ function dkan_sci_metadata_install() {
     $t('Author ID Type imported.'),
     'status'
   );
+
+  // Set up Defaults
+  $sci_metadata = new ParagraphsItemEntity();
+  $sci_metadata->field_name = 'field_metadata_extended';
+  $sci_metadata->bundle = 'science_metadata';
+  $sci_metadata->save(TRUE);
+  db_merge('paragraphs_defaults')
+    ->insertFields(array(
+      'entity_type' => 'node',
+      'field_name' => 'field_metadata_extended',
+      'bundle' => 'dataset',
+      'item_id' => $sci_metadata->item_id,
+    ))
+    ->updateFields(array(
+      'item_id' => $sci_metadata->item_id,
+    ))
+    ->key(array(
+      'item_id' => $sci_metadata->item_id,
+    ))
+    ->execute();
 }

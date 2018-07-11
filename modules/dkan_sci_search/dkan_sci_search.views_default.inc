@@ -46,35 +46,16 @@ function dkan_sci_search_views_default_views() {
   $handler->display->display_options['empty']['area']['empty'] = TRUE;
   $handler->display->display_options['empty']['area']['content'] = 'No results were found. Please try another keyword.';
   $handler->display->display_options['empty']['area']['format'] = 'plain_text';
-  /* Field: Indexed Node: Title */
-  $handler->display->display_options['fields']['title']['id'] = 'title';
-  $handler->display->display_options['fields']['title']['table'] = 'search_api_index_dkan_sci_search';
-  $handler->display->display_options['fields']['title']['field'] = 'title';
-  $handler->display->display_options['fields']['title']['label'] = '';
-  $handler->display->display_options['fields']['title']['element_type'] = 'h2';
-  $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['title']['link_to_entity'] = 1;
-  /* Field: Indexed Node: Highlight Image */
-  $handler->display->display_options['fields']['field_highlight_image']['id'] = 'field_highlight_image';
-  $handler->display->display_options['fields']['field_highlight_image']['table'] = 'search_api_index_dkan_sci_search';
-  $handler->display->display_options['fields']['field_highlight_image']['field'] = 'field_highlight_image';
-  $handler->display->display_options['fields']['field_highlight_image']['label'] = '';
-  $handler->display->display_options['fields']['field_highlight_image']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_highlight_image']['click_sort_column'] = 'fid';
-  $handler->display->display_options['fields']['field_highlight_image']['settings'] = array(
-    'image_style' => 'thumbnail',
-    'image_link' => 'content',
-  );
-  /* Field: Indexed Node: Dataset */
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['id'] = 'field_dataset_metadata_ref';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['table'] = 'search_api_index_dkan_sci_search';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['field'] = 'field_dataset_metadata_ref';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['label'] = '';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['element_wrapper_type'] = 'h2';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['link_to_entity'] = 1;
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['view_mode'] = 'full';
-  $handler->display->display_options['fields']['field_dataset_metadata_ref']['bypass_access'] = 0;
+  /* Field: Content: Rendered Content */
+  $handler->display->display_options['fields']['rendered_entity']['id'] = 'rendered_entity';
+  $handler->display->display_options['fields']['rendered_entity']['table'] = 'views_entity_node';
+  $handler->display->display_options['fields']['rendered_entity']['field'] = 'rendered_entity';
+  $handler->display->display_options['fields']['rendered_entity']['label'] = '';
+  $handler->display->display_options['fields']['rendered_entity']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['rendered_entity']['link_to_entity'] = 1;
+  $handler->display->display_options['fields']['rendered_entity']['display'] = 'view';
+  $handler->display->display_options['fields']['rendered_entity']['view_mode'] = 'search_result';
+  $handler->display->display_options['fields']['rendered_entity']['bypass_access'] = 0;
   /* Field: Search: Excerpt */
   $handler->display->display_options['fields']['search_api_excerpt']['id'] = 'search_api_excerpt';
   $handler->display->display_options['fields']['search_api_excerpt']['table'] = 'search_api_index_dkan_sci_search';
@@ -82,27 +63,7 @@ function dkan_sci_search_views_default_views() {
   $handler->display->display_options['fields']['search_api_excerpt']['label'] = '';
   $handler->display->display_options['fields']['search_api_excerpt']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['search_api_excerpt']['link_to_entity'] = 0;
-  /* Field: Indexed Node: The main body text */
-  $handler->display->display_options['fields']['body']['id'] = 'body';
-  $handler->display->display_options['fields']['body']['table'] = 'search_api_index_dkan_sci_search';
-  $handler->display->display_options['fields']['body']['field'] = 'body';
-  $handler->display->display_options['fields']['body']['label'] = '';
-  $handler->display->display_options['fields']['body']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['body']['type'] = 'smart_trim_format';
-  $handler->display->display_options['fields']['body']['settings'] = array(
-    'trim_link' => '0',
-    'trim_length' => '300',
-    'trim_type' => 'chars',
-    'trim_suffix' => '...',
-    'more_link' => '0',
-    'more_text' => 'Read more',
-    'summary_handler' => 'full',
-    'trim_options' => array(
-      'text' => 0,
-    ),
-    'trim_preserve_tags' => '',
-  );
-  /* Sort criterion: Indexed Node: Date changed */
+  /* Sort criterion: Indexed Content: Date changed */
   $handler->display->display_options['sorts']['changed']['id'] = 'changed';
   $handler->display->display_options['sorts']['changed']['table'] = 'search_api_index_dkan_sci_search';
   $handler->display->display_options['sorts']['changed']['field'] = 'changed';

@@ -11,7 +11,7 @@ function dkan_sci_search_default_page_manager_pages() {
   $page = new stdClass();
   $page->disabled = FALSE; /* Edit this to true to make a default page disabled initially */
   $page->api_version = 1;
-  $page->name = 'datasets';
+  $page->name = 'search';
   $page->task = 'page';
   $page->admin_title = 'Datasets';
   $page->admin_description = '';
@@ -29,11 +29,11 @@ function dkan_sci_search_default_page_manager_pages() {
   $handler = new stdClass();
   $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
-  $handler->name = 'page_datasets__dkan-sci';
+  $handler->name = 'page_search__panel_context_9cd2f118-768d-4992-a490-2bbb021a0137';
   $handler->task = 'page';
-  $handler->subtask = 'datasets';
+  $handler->subtask = 'search';
   $handler->handler = 'panel_context';
-  $handler->weight = -2;
+  $handler->weight = 0;
   $handler->conf = array(
     'title' => 'DKAN Sci',
     'no_blocks' => 0,
@@ -59,7 +59,7 @@ return TRUE;
         ),
       ),
     ),
-    'name' => 'dkan-sci',
+    'name' => '',
   );
   $display = new panels_display();
   $display->layout = 'radix_bryant';
@@ -127,7 +127,7 @@ return TRUE;
   $display->title = '';
   $display->uuid = 'b1ebec5e-aed7-4ebc-82de-7e9eac72c35a';
   $display->storage_type = 'page_manager';
-  $display->storage_id = 'page_datasets__dkan-sci';
+  $display->storage_id = 'page_search__panel_context_9cd2f118-768d-4992-a490-2bbb021a0137';
   $display->content = array();
   $display->panels = array();
   $pane = new stdClass();
@@ -219,29 +219,6 @@ return TRUE;
   $display->content['new-2e30ce9c-f94c-4d1f-9eee-e945acc6fc11'] = $pane;
   $display->panels['sidebar'][2] = 'new-2e30ce9c-f94c-4d1f-9eee-e945acc6fc11';
   $pane = new stdClass();
-  $pane->pid = 'new-ef95d96f-7859-412f-a127-05384769ed81';
-  $pane->panel = 'sidebar';
-  $pane->type = 'block';
-  $pane->subtype = 'facetapi-AXUHJ471FXXJhKllDC1HUakiZC11qo8v';
-  $pane->shown = TRUE;
-  $pane->access = array();
-  $pane->configuration = array(
-    'override_title' => 1,
-    'override_title_text' => 'Filter by Funding Source',
-    'override_title_heading' => 'h2',
-  );
-  $pane->cache = array();
-  $pane->style = array(
-    'settings' => NULL,
-  );
-  $pane->css = array();
-  $pane->extras = array();
-  $pane->position = 3;
-  $pane->locks = array();
-  $pane->uuid = 'ef95d96f-7859-412f-a127-05384769ed81';
-  $display->content['new-ef95d96f-7859-412f-a127-05384769ed81'] = $pane;
-  $display->panels['sidebar'][3] = 'new-ef95d96f-7859-412f-a127-05384769ed81';
-  $pane = new stdClass();
   $pane->pid = 'new-fc832d2f-9b2e-4d3d-978f-3d4689712036';
   $pane->panel = 'sidebar';
   $pane->type = 'block';
@@ -259,11 +236,11 @@ return TRUE;
   );
   $pane->css = array();
   $pane->extras = array();
-  $pane->position = 4;
+  $pane->position = 3;
   $pane->locks = array();
   $pane->uuid = 'fc832d2f-9b2e-4d3d-978f-3d4689712036';
   $display->content['new-fc832d2f-9b2e-4d3d-978f-3d4689712036'] = $pane;
-  $display->panels['sidebar'][4] = 'new-fc832d2f-9b2e-4d3d-978f-3d4689712036';
+  $display->panels['sidebar'][3] = 'new-fc832d2f-9b2e-4d3d-978f-3d4689712036';
   $pane = new stdClass();
   $pane->pid = 'new-581a76c1-09f6-430c-9504-6ec56f7d526d';
   $pane->panel = 'sidebar';
@@ -282,34 +259,11 @@ return TRUE;
   );
   $pane->css = array();
   $pane->extras = array();
-  $pane->position = 5;
+  $pane->position = 4;
   $pane->locks = array();
   $pane->uuid = '581a76c1-09f6-430c-9504-6ec56f7d526d';
   $display->content['new-581a76c1-09f6-430c-9504-6ec56f7d526d'] = $pane;
-  $display->panels['sidebar'][5] = 'new-581a76c1-09f6-430c-9504-6ec56f7d526d';
-  $pane = new stdClass();
-  $pane->pid = 'new-449181e5-af96-493d-84a2-9d206509e490';
-  $pane->panel = 'sidebar';
-  $pane->type = 'block';
-  $pane->subtype = 'facetapi-LeKDPflArwbla6ejaP5WRlVMKEnP2jW8';
-  $pane->shown = TRUE;
-  $pane->access = array();
-  $pane->configuration = array(
-    'override_title' => 1,
-    'override_title_text' => 'Filter by Author',
-    'override_title_heading' => 'h2',
-  );
-  $pane->cache = array();
-  $pane->style = array(
-    'settings' => NULL,
-  );
-  $pane->css = array();
-  $pane->extras = array();
-  $pane->position = 6;
-  $pane->locks = array();
-  $pane->uuid = '449181e5-af96-493d-84a2-9d206509e490';
-  $display->content['new-449181e5-af96-493d-84a2-9d206509e490'] = $pane;
-  $display->panels['sidebar'][6] = 'new-449181e5-af96-493d-84a2-9d206509e490';
+  $display->panels['sidebar'][4] = 'new-581a76c1-09f6-430c-9504-6ec56f7d526d';
   $pane = new stdClass();
   $pane->pid = 'new-60069629-8fc1-450d-bc04-42275f841874';
   $pane->panel = 'sidebar';
@@ -328,23 +282,92 @@ return TRUE;
   );
   $pane->css = array();
   $pane->extras = array();
-  $pane->position = 7;
+  $pane->position = 5;
   $pane->locks = array();
   $pane->uuid = '60069629-8fc1-450d-bc04-42275f841874';
   $display->content['new-60069629-8fc1-450d-bc04-42275f841874'] = $pane;
-  $display->panels['sidebar'][7] = 'new-60069629-8fc1-450d-bc04-42275f841874';
+  $display->panels['sidebar'][5] = 'new-60069629-8fc1-450d-bc04-42275f841874';
+  $pane = new stdClass();
+  $pane->pid = 'new-dcb7c7c7-9578-49c4-80f4-600f77381504';
+  $pane->panel = 'sidebar';
+  $pane->type = 'block';
+  $pane->subtype = 'facetapi-VQzzjrVwjXM8Tz7lMfnLPawwB6ICa1Kn';
+  $pane->shown = TRUE;
+  $pane->access = array();
+  $pane->configuration = array(
+    'override_title' => 1,
+    'override_title_text' => 'Collection',
+    'override_title_heading' => 'h2',
+  );
+  $pane->cache = array();
+  $pane->style = array(
+    'settings' => NULL,
+  );
+  $pane->css = array();
+  $pane->extras = array();
+  $pane->position = 6;
+  $pane->locks = array();
+  $pane->uuid = 'dcb7c7c7-9578-49c4-80f4-600f77381504';
+  $display->content['new-dcb7c7c7-9578-49c4-80f4-600f77381504'] = $pane;
+  $display->panels['sidebar'][6] = 'new-dcb7c7c7-9578-49c4-80f4-600f77381504';
+  $pane = new stdClass();
+  $pane->pid = 'new-11bb3fdb-dee3-4c9d-a8b9-b91a38ae0ee0';
+  $pane->panel = 'sidebar';
+  $pane->type = 'block';
+  $pane->subtype = 'facetapi-YCus5IXtq7RwGRYVZ14KKrDlgl7Vmo5U';
+  $pane->shown = TRUE;
+  $pane->access = array();
+  $pane->configuration = array(
+    'override_title' => 1,
+    'override_title_text' => 'Filter by Author',
+    'override_title_heading' => 'h2',
+  );
+  $pane->cache = array();
+  $pane->style = array(
+    'settings' => NULL,
+  );
+  $pane->css = array();
+  $pane->extras = array();
+  $pane->position = 7;
+  $pane->locks = array();
+  $pane->uuid = '11bb3fdb-dee3-4c9d-a8b9-b91a38ae0ee0';
+  $display->content['new-11bb3fdb-dee3-4c9d-a8b9-b91a38ae0ee0'] = $pane;
+  $display->panels['sidebar'][7] = 'new-11bb3fdb-dee3-4c9d-a8b9-b91a38ae0ee0';
+  $pane = new stdClass();
+  $pane->pid = 'new-1d8b0e30-9657-4556-a1ea-1fbc5d5295b3';
+  $pane->panel = 'sidebar';
+  $pane->type = 'block';
+  $pane->subtype = 'facetapi-EC1nOjhUH4DrgbAef3R9cRq69GpW9HtT';
+  $pane->shown = TRUE;
+  $pane->access = array();
+  $pane->configuration = array(
+    'override_title' => 1,
+    'override_title_text' => 'Funding Source',
+    'override_title_heading' => 'h2',
+  );
+  $pane->cache = array();
+  $pane->style = array(
+    'settings' => NULL,
+  );
+  $pane->css = array();
+  $pane->extras = array();
+  $pane->position = 8;
+  $pane->locks = array();
+  $pane->uuid = '1d8b0e30-9657-4556-a1ea-1fbc5d5295b3';
+  $display->content['new-1d8b0e30-9657-4556-a1ea-1fbc5d5295b3'] = $pane;
+  $display->panels['sidebar'][8] = 'new-1d8b0e30-9657-4556-a1ea-1fbc5d5295b3';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
   $page->default_handlers[$handler->name] = $handler;
   $handler = new stdClass();
-  $handler->disabled = TRUE; /* Edit this to true to make a default handler disabled initially */
+  $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
-  $handler->name = 'page_datasets_panel_context';
+  $handler->name = 'page_search__panel_context_1e323e28-07e3-4426-b553-506139caac2e';
   $handler->task = 'page';
-  $handler->subtask = 'datasets';
+  $handler->subtask = 'search';
   $handler->handler = 'panel_context';
-  $handler->weight = -1;
+  $handler->weight = 1;
   $handler->conf = array(
     'title' => 'With Topics',
     'no_blocks' => 0,
@@ -370,6 +393,7 @@ return TRUE;
         ),
       ),
     ),
+    'name' => '',
   );
   $display = new panels_display();
   $display->layout = 'radix_bryant';
@@ -437,7 +461,7 @@ return TRUE;
   $display->title = '';
   $display->uuid = 'b1ebec5e-aed7-4ebc-82de-7e9eac72c35a';
   $display->storage_type = 'page_manager';
-  $display->storage_id = 'page_datasets_panel_context';
+  $display->storage_id = 'page_search__panel_context_1e323e28-07e3-4426-b553-506139caac2e';
   $display->content = array();
   $display->panels = array();
   $pane = new stdClass();
@@ -737,13 +761,13 @@ return TRUE;
   $handler->conf['display'] = $display;
   $page->default_handlers[$handler->name] = $handler;
   $handler = new stdClass();
-  $handler->disabled = TRUE; /* Edit this to true to make a default handler disabled initially */
+  $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
-  $handler->name = 'page_datasets__without-topics';
+  $handler->name = 'page_search__panel_context_bd7ca252-7a66-4813-9993-e486a36daa87';
   $handler->task = 'page';
-  $handler->subtask = 'datasets';
+  $handler->subtask = 'search';
   $handler->handler = 'panel_context';
-  $handler->weight = 0;
+  $handler->weight = 2;
   $handler->conf = array(
     'title' => 'Without Topics',
     'no_blocks' => 0,
@@ -769,7 +793,7 @@ return TRUE;
         ),
       ),
     ),
-    'name' => 'without-topics',
+    'name' => '',
   );
   $display = new panels_display();
   $display->layout = 'radix_bryant';
@@ -837,7 +861,7 @@ return TRUE;
   $display->title = '';
   $display->uuid = 'b1ebec5e-aed7-4ebc-82de-7e9eac72c35a';
   $display->storage_type = 'page_manager';
-  $display->storage_id = 'page_datasets__without-topics';
+  $display->storage_id = 'page_search__panel_context_bd7ca252-7a66-4813-9993-e486a36daa87';
   $display->content = array();
   $display->panels = array();
   $pane = new stdClass();
@@ -1049,7 +1073,7 @@ return TRUE;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
   $page->default_handlers[$handler->name] = $handler;
-  $pages['datasets'] = $page;
+  $pages['search'] = $page;
 
   return $pages;
 
