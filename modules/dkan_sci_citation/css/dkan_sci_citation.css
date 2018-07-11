@@ -1,0 +1,37 @@
+#citation-results.activated {
+  width: 70%;
+  bottom: 30%;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  position: fixed;
+  background: white;
+  padding: 50px;
+  z-index: 500;
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
+}
+
+#citation-results .close-citation {
+  color: red;
+  font-weight: bold;
+  position: absolute;
+  right: 25px;
+  top: 15px;
+  cursor: pointer;
+}
+
+.citation-preview {
+  background: #6b8d4b;
+  border-color: #6b8d4b;
+  color: white;
+}
+
+.citation-break {
+    border-bottom: thin dashed #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
