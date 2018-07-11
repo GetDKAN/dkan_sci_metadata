@@ -32,6 +32,7 @@ function dkan_sci_citation_form_alter(&$form, &$form_state, $form_id) {
   if (array_key_exists('field_metadata_extended', $form)) {
     $path = drupal_get_path('module', 'dkan_sci_citation');
     drupal_add_js("$path/js/dkan_sci_citation.js");
+    drupal_add_css("$path/css/dkan_sci_citation.css");
 
     // Used for custom js op to determine environment.
     global $theme;
@@ -48,8 +49,7 @@ function dkan_sci_citation_form_alter(&$form, &$form_state, $form_id) {
     // Check to see if at least one of the paragraphs is a citation.
     foreach (element_children($form['field_metadata_extended'][$field_language]) as $key) {
       $element = $form['field_metadata_extended'][$field_language][$key];
-
-      if ($element['#bundle'] === 'sci_citation') {
+      if (isset($element['#bundle']) && $element['#bundle'] === 'sci_citation') {
         $citation = TRUE;
       }
     }
