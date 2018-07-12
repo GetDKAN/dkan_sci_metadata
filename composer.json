@@ -1,6 +1,1 @@
-{
-    "require": {
-        "renanbr/crossref-client": "^1@dev",
-        "audiolabs/bibtexparser": "dev-master"
-    }
-}
+{}

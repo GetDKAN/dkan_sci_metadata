@@ -11,6 +11,47 @@ function dkan_sci_citation_field_default_field_instances() {
   $field_instances = array();
 
   // Exported field_instance:
+  // 'paragraphs_item-sci_citation-field_alt_object_id'.
+  $field_instances['paragraphs_item-sci_citation-field_alt_object_id'] = array(
+    'bundle' => 'sci_citation',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_plain',
+        'weight' => 5,
+      ),
+      'paragraphs_editor_preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'paragraphs_item',
+    'field_name' => 'field_alt_object_id',
+    'label' => 'Alternate Object ID',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance:
   // 'paragraphs_item-sci_citation-field_dkan_cite_bibtex'.
   $field_instances['paragraphs_item-sci_citation-field_dkan_cite_bibtex'] = array(
     'bueditor_profile' => -1,
@@ -54,6 +95,7 @@ function dkan_sci_citation_field_default_field_instances() {
   // Exported field_instance:
   // 'paragraphs_item-sci_citation-field_dkan_cite_data'.
   $field_instances['paragraphs_item-sci_citation-field_dkan_cite_data'] = array(
+    'bueditor_profile' => -1,
     'bundle' => 'sci_citation',
     'default_value' => NULL,
     'deleted' => 0,
@@ -61,10 +103,10 @@ function dkan_sci_citation_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'field_hidden',
+        'module' => 'dkan_sci_citation',
         'settings' => array(),
-        'type' => 'field_hidden_text_plain',
-        'weight' => 0,
+        'type' => 'dkan_sci_cite',
+        'weight' => 4,
       ),
       'paragraphs_editor_preview' => array(
         'label' => 'above',
@@ -78,15 +120,17 @@ function dkan_sci_citation_field_default_field_instances() {
     'label' => 'Citation',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
+      'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 0,
-      'module' => 'field_hidden',
-      'settings' => array(),
-      'type' => 'field_hidden',
-      'weight' => 4,
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 6,
     ),
   );
 
@@ -132,6 +176,7 @@ function dkan_sci_citation_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Alternate Object ID');
   t('Bibtex');
   t('Citation');
   t('DOI');
