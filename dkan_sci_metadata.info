@@ -39,3 +39,4 @@ features[taxonomy][] = sci_author_id_type
 features[variable][] = field_bundle_settings_paragraphs_item__sci_author
 features[variable][] = field_bundle_settings_paragraphs_item__sci_review
 features[variable][] = field_bundle_settings_paragraphs_item__sci_purpose_methods
+stylesheets[all][] = css/style.css

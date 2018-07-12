@@ -116,7 +116,7 @@ function dkan_sci_metadata_field_widget_form_alter(&$element, &$form_state, $con
     // Replace "Add Science Author" with "Add Reviewer"
     $element['add_more']['add_more_bundle_sci_author']['#value'] = 'Add Reviewer';
   }
-  elseif ($element['#entity_type'] == 'paragraphs_item') {
+  elseif (isset($element['#entity_type']) && $element['#entity_type'] == 'paragraphs_item') {
     if ($context['form']['#bundle'] == 'sci_review') {
       // Replace all titles/descriptions from Author to Reviewer, preserve case.
       $element['#title'] = preg_replace("/author/", "reviewer", $element['#title']);
@@ -245,9 +245,177 @@ function dkan_sci_metadata_smm() {
 }
 
 /**
- * Implements hook_js_alter().
+ * Implements hook_theme_registry_alter().
  */
-function dkan_sci_metadata_js_alter(&$js) {
-  // Disable sticky-header on node forms.
-  unset($js['misc/tableheader.js']);
+function dkan_sci_metadata_theme_registry_alter(&$theme_registry) {
+  $theme_registry['paragraphs_field_multiple_value_form']['theme path'] = drupal_get_path('module', 'dkan_sci_metadata');
+  $theme_registry['paragraphs_field_multiple_value_form']['function'] = 'dkan_sci_metadata_theme_paragraphs_field_multiple_value_form';
 }
+
+/**
+ * Theme function override for multiple-value form widgets.
+ *
+ * @see theme_paragraphs_field_multiple_value_form()
+ */
+function dkan_sci_metadata_theme_paragraphs_field_multiple_value_form($variables) {
+  // Remove draggable order and sticky headers on science paragraphs.
+  if ($variables['element']['#array_parents'][0] == 'field_metadata_extended') {
+    $element = $variables['element'];
+    $output = '';
+    $instance = $element['#instance'];
+
+    if (!isset($instance['settings']['title'])) {
+      $instance['settings']['title'] = PARAGRAPHS_DEFAULT_TITLE;
+    }
+    if (!isset($instance['settings']['title_multiple'])) {
+      $instance['settings']['title_multiple'] = PARAGRAPHS_DEFAULT_TITLE_MULTIPLE;
+    }
+
+    $add_mode = (isset($instance['settings']['add_mode']) ? $instance['settings']['add_mode'] : PARAGRAPHS_DEFAULT_ADD_MODE);
+
+    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    //$order_class = $element['#field_name'] . '-delta-order';
+    $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
+
+    $header = array(
+      array(
+        'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+        'colspan' => 2,
+        'class' => array('field-label'),
+      ),
+    );
+    $rows = array();
+
+    $items = array();
+    foreach (element_children($element) as $key) {
+      if ($key === 'add_more') {
+        $add_more_button = &$element[$key];
+      }
+      elseif ($key === 'add_more_type') {
+        $add_more_button_type = &$element[$key];
+      }
+      else {
+        if (!isset($element[$key]['#access']) || $element[$key]['#access']) {
+          $items[] = &$element[$key];
+        }
+      }
+    }
+    usort($items, '_field_sort_items_value_helper');
+
+    // Add the items as table rows.
+    foreach ($items as $key => $item) {
+      // We don't want the weight to render.
+      unset($item['_weight']);
+      $cells = array(
+        drupal_render($item),
+      );
+      $rows[] = array(
+        'data' => $cells,
+        'class' => array(drupal_html_class('paragraphs_item_type_' . $item['#bundle'])),
+      );
+    }
+
+    $output = '<div class="form-item paragraph-form-item">';
+    if (count($items)) {
+      $output .= theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+    }
+    else {
+      $add_text = 'No @title_multiple added yet. Select a @title type and press the button below to add one.';
+      if ($add_mode == 'button') {
+        $add_text = 'No @title_multiple added yet. Select a @title type and press a button below to add one.';
+      }
+      $output .= '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>";
+      $output .= '<p><em>' . t($add_text, array('@title_multiple' => t($instance['settings']['title_multiple']), '@title' => t($instance['settings']['title']))) . '</em></p>';
+    }
+    $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
+    $output .= '<div class="clearfix">' . drupal_render($add_more_button_type) . drupal_render($add_more_button) . '</div>';
+    $output .= '</div>';
+
+    return $output;
+  }
+  else {
+    // Standard paragraph output.
+    $element = $variables['element'];
+    $output = '';
+    $instance = $element['#instance'];
+
+    if (!isset($instance['settings']['title'])) {
+      $instance['settings']['title'] = PARAGRAPHS_DEFAULT_TITLE;
+    }
+    if (!isset($instance['settings']['title_multiple'])) {
+      $instance['settings']['title_multiple'] = PARAGRAPHS_DEFAULT_TITLE_MULTIPLE;
+    }
+
+    $add_mode = (isset($instance['settings']['add_mode']) ? $instance['settings']['add_mode'] : PARAGRAPHS_DEFAULT_ADD_MODE);
+
+    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    $order_class = $element['#field_name'] . '-delta-order';
+    $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
+
+    $header = array(
+      array(
+        'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+        'colspan' => 2,
+        'class' => array('field-label'),
+      ),
+      t('Order'),
+    );
+    $rows = array();
+
+    // Sort items according to '_weight' (needed when the form comes back after
+    // preview or failed validation)
+    $items = array();
+    foreach (element_children($element) as $key) {
+      if ($key === 'add_more') {
+        $add_more_button = &$element[$key];
+      }
+      elseif ($key === 'add_more_type') {
+        $add_more_button_type = &$element[$key];
+      }
+      else {
+        if (!isset($element[$key]['#access']) || $element[$key]['#access']) {
+          $items[] = &$element[$key];
+        }
+      }
+    }
+    usort($items, '_field_sort_items_value_helper');
+
+    // Add the items as table rows.
+    foreach ($items as $key => $item) {
+      $item['_weight']['#attributes']['class'] = array($order_class);
+      $delta_element = drupal_render($item['_weight']);
+      $cells = array(
+        array('data' => '', 'class' => array('field-multiple-drag')),
+        drupal_render($item),
+        array('data' => $delta_element, 'class' => array('delta-order')),
+      );
+      $rows[] = array(
+        'data' => $cells,
+        'class' => array('draggable', drupal_html_class('paragraphs_item_type_' . $item['#bundle'])),
+      );
+    }
+
+    $output = '<div class="form-item">';
+    if (count($items)) {
+      $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+    }
+    else {
+      $add_text = 'No @title_multiple added yet. Select a @title type and press the button below to add one.';
+      if ($add_mode == 'button') {
+        $add_text = 'No @title_multiple added yet. Select a @title type and press a button below to add one.';
+      }
+      $output .= '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>";
+      $output .= '<p><em>' . t($add_text, array('@title_multiple' => t($instance['settings']['title_multiple']), '@title' => t($instance['settings']['title']))) . '</em></p>';
+    }
+    $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
+    $output .= '<div class="clearfix">' . drupal_render($add_more_button_type) . drupal_render($add_more_button) . '</div>';
+    $output .= '</div>';
+
+    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+
+    return $output;
+  }
+}
+
+
+

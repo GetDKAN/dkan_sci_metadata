@@ -1,0 +1,15 @@
+.field-type-paragraphs div[id$='-bundle-title'] {
+  border-bottom: 1px solid #999;
+  padding: 0px 10px;
+  font-weight: bold;
+}
+.field-type-paragraphs div[class^='field-type'] {
+  margin: 10px;
+}
+tr.paragraphs-item-type-sci-purpose-methods.odd .form-item,
+tr.paragraphs-item-type-sci-purpose-methods.even .form-item {
+  white-space: normal;
+}
+.field-type-paragraphs .form-actions {
+  background-color: transparent;
+}
