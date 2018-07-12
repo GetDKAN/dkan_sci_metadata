@@ -1,0 +1,11 @@
+tr.paragraphs-item-type-sci-purpose-methods.odd .form-item,
+tr.paragraphs-item-type-sci-purpose-methods.even .form-item {
+  white-space: normal;
+}
+.field-type-paragraphs .form-actions {
+  background-color: transparent;
+}
+.field-type-paragraphs .tabledrag-toggle-weight-wrapper,
+.field-type-paragraphs .field-multiple-drag {
+  display: none;
+}

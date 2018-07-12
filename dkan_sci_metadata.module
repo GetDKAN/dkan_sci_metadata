@@ -243,3 +243,12 @@ function dkan_sci_metadata_smm() {
   $output = MigrateSciMetadata::migrate();
   print ($output);
 }
+
+function dkan_sci_metadata_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'dataset_node_form':
+      $path = drupal_get_path('module', 'dkan_sci_metadata');
+      drupal_add_css ($path . "/css/style.css");
+      break;
+  }
+}
