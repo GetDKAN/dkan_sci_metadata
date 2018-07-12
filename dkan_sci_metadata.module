@@ -243,3 +243,11 @@ function dkan_sci_metadata_smm() {
   $output = MigrateSciMetadata::migrate();
   print ($output);
 }
+
+/**
+ * Implements hook_js_alter().
+ */
+function dkan_sci_metadata_js_alter(&$js) {
+  // Disable sticky-header on node forms.
+  unset($js['misc/tableheader.js']);
+}
