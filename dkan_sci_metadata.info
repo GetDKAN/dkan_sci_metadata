@@ -74,3 +74,4 @@ features[variable][] = field_bundle_settings_paragraphs_item__sci_author
 features[variable][] = field_bundle_settings_paragraphs_item__sci_purpose_methods
 features[variable][] = field_bundle_settings_paragraphs_item__sci_review
 features_exclude[field_base][field_use_limitations] = field_use_limitations
+stylesheets[all][] = css/style.css
