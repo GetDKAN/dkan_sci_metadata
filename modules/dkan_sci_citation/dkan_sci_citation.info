@@ -7,7 +7,6 @@ dependencies[] = field_hidden
 dependencies[] = open_data_schema_map
 dependencies[] = paragraphs
 dependencies[] = text
-dependencies[] = usda_content_types
 features[features_api][] = api:2
 features[field_base][] = field_alt_object_id
 features[field_base][] = field_dkan_cite_bibtex
