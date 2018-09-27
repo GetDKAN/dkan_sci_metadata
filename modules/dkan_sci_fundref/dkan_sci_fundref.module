@@ -68,6 +68,7 @@ function dkan_sci_fundref_form_alter(&$form, &$form_state, $form_id) {
  *   Altered form array
  */
 function _dkan_sci_fundref_after_build($form, &$form_state) {
+  drupal_add_css("$path/css/dkan_sci_fundref.css");
   if ($form['#form_id'] == 'taxonomy_form_term' && $form['#bundle'] == 'dkan_sci_fundref') {
     // Hide the URL Alias section.
     $form['path']['#access'] = FALSE;
@@ -209,4 +210,55 @@ function _dkan_sci_fundref_funder_lookup($doi_url = '', $json_output = FALSE) {
     }
   }
   return NULL;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function dkan_sci_fundref_field_formatter_info() {
+  return array(
+    'dkan_sci_fundref_formatter' => array(
+      'label' => t('Funding Source display'),
+      'field types' => array('taxonomy_term_reference'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function dkan_sci_fundref_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+
+    case 'dkan_sci_fundref_formatter':
+      global $base_url;
+      // Custom formatter for topic field.
+      foreach ($items as $delta => $item) {
+        $term = taxonomy_term_load($item['tid']);
+        if (!$term) {
+          watchdog('dkan_topics', "Attempt to load missing taxonomy term id: %tid", array(
+            '%tid' => $item['tid'],
+          ), WATCHDOG_NOTICE);
+          continue;
+        }
+        $url = $term->field_dkan_sci_fundref_doi[LANGUAGE_NONE][0]['url'];
+        // Image Icon formatter.
+        $element[$delta] = array(
+          'name' => array(
+            '#type' => 'markup',
+            '#markup' => check_plain($term->name),
+          ),
+          'doi' => array(
+            '#type' => 'markup',
+            '#markup' => l($url, $url),
+            '#prefix' => '<br />',
+          )
+        );
+      }
+      break;
+  }
+
+  return $element;
 }
