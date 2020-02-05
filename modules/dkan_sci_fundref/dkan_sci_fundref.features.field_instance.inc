@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * dkan_sci_fundref.features.field_instance.inc
@@ -34,19 +35,18 @@ function dkan_sci_fundref_field_default_field_instances() {
     ),
     'entity_type' => 'paragraphs_item',
     'field_name' => 'field_sci_fundref',
-    'label' => 'FundRef',
+    'label' => 'Funding Source',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 0,
-      'module' => 'taxonomy',
+      'active' => 1,
+      'module' => 'options',
       'settings' => array(
-        'autocomplete_path' => 'taxonomy/autocomplete',
-        'size' => 60,
+        'apply_chosen' => '',
       ),
-      'type' => 'taxonomy_autocomplete',
+      'type' => 'options_select',
       'weight' => 3,
     ),
   );
@@ -98,7 +98,7 @@ function dkan_sci_fundref_field_default_field_instances() {
     'bundle' => 'dkan_sci_fundref',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'Digital Object Identifier for Fundref. If no DOI is provided then the field is populated using the Founder name.',
+    'description' => 'Digital Object Identifier for Fundref. If no DOI is provided then the field is populated using the funder name.',
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -147,8 +147,8 @@ function dkan_sci_fundref_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('DOI');
-  t('Digital Object Identifier for Fundref. If no DOI is provided then the field is populated using the Founder name.');
-  t('FundRef');
+  t('Digital Object Identifier for Fundref. If no DOI is provided then the field is populated using the funder name.');
+  t('Funding Source');
   t('Project / Grant Number');
 
   return $field_instances;

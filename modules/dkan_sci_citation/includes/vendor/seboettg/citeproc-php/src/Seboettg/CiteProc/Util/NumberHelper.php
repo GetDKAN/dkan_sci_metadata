@@ -26,26 +26,22 @@ class NumberHelper
 
     const PATTERN_COMMA_AMPERSAND_RANGE = "/\d*([\s?\-&+,;\s])+\d+/";
 
-  function roman_numerals() {
-    return [
-      ["", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix"],
-      ["", "x", "xx", "xxx", "xl", "l", "lx", "lxx", "lxxx", "xc"],
-      ["", "c", "cc", "ccc", "cd", "d", "dc", "dcc", "dccc", "cm"],
-      ["", "m", "mm", "mmm", "mmmm", "mmmmm"]
+    const ROMAN_NUMERALS = [
+        ["", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix"],
+        ["", "x", "xx", "xxx", "xl", "l", "lx", "lxx", "lxxx", "xc"],
+        ["", "c", "cc", "ccc", "cd", "d", "dc", "dcc", "dccc", "cm"],
+        ["", "m", "mm", "mmm", "mmmm", "mmmmm"]
     ];
-  }
 
-  function roman_digits() {
-    return [
-      "M" => 1000,
-      "D" => 500,
-      "C" => 100,
-      "L" => 50,
-      "X" => 10,
-      "V" => 5,
-      "I" => 1
+    const ROMAN_DIGITS = [
+        "M" => 1000,
+        "D" => 500,
+        "C" => 100,
+        "L" => 50,
+        "X" => 10,
+        "V" => 5,
+        "I" => 1
     ];
-  }
 
     /**
      * @return \Closure
@@ -78,7 +74,7 @@ class NumberHelper
             $len = strlen($numStr);
             for ($pos = 0; $pos < $len; $pos++) {
                 $n = $numStr[$pos];
-                $ret = self::roman_numerals()[$pos][$n] . $ret;
+                $ret = self::ROMAN_NUMERALS[$pos][$n] . $ret;
             }
         }
         return $ret;
@@ -98,8 +94,8 @@ class NumberHelper
         // Convert the string to an array of roman values:
         for ($i = 0; $i < strlen($romanNumber); ++$i) {
             $char = strtoupper($romanNumber{$i});
-            if (self::roman_digits()[$char] !== null) {
-                $values[] = self::roman_digits()[$char];
+            if (self::ROMAN_DIGITS[$char] !== null) {
+                $values[] = self::ROMAN_DIGITS[$char];
             }
         }
 
@@ -117,7 +113,7 @@ class NumberHelper
     {
         for ($i = 0; $i < strlen($str); ++$i) {
             $char = strtoupper($str{$i});
-            if (!in_array($char, array_keys(self::roman_digits()))) {
+            if (!in_array($char, array_keys(self::ROMAN_DIGITS))) {
                 return false;
             }
         }

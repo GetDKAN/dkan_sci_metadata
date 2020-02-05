@@ -3,6 +3,7 @@ core = 7.x
 package = DKAN
 version = 7.x-1.0
 project = dkan_sci_fundref
+dependencies[] = autocomplete_deluxe
 dependencies[] = ctools
 dependencies[] = dkan_dataset_content_types
 dependencies[] = facetapi

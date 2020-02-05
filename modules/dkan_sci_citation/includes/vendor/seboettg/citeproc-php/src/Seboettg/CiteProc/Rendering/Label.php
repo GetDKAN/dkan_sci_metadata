@@ -12,7 +12,6 @@ use Seboettg\CiteProc\CiteProc;
 use Seboettg\CiteProc\Styles\AffixesTrait;
 use Seboettg\CiteProc\Styles\FormattingTrait;
 use Seboettg\CiteProc\Styles\TextCaseTrait;
-use Seboettg\CiteProc\Util\NumberHelper;
 
 
 /**
@@ -128,7 +127,7 @@ class Label implements Rendering
      */
     private function evaluateStringPluralism($data, $variable)
     {
-        $str = $data->{$variable};
+        $str = isset($data->{$variable}) ? $data->{$variable} : '';
         $plural = 'single';
         if (!empty($str)) {
             switch ($variable) {
@@ -167,7 +166,7 @@ class Label implements Rendering
     protected function getPlural($data, $plural, $variable)
     {
 
-        if ($variable === "editortranslator") {
+        if ($variable === "editortranslator" && isset($data->editor)) {
             $var = $data->editor;
         } else {
             $var = $data->{$variable};

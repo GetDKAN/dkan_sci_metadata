@@ -32,7 +32,6 @@ function dkan_sci_citation_form_alter(&$form, &$form_state, $form_id) {
   if (array_key_exists('field_metadata_extended', $form)) {
     $path = drupal_get_path('module', 'dkan_sci_citation');
     drupal_add_js("$path/js/dkan_sci_citation.js");
-    drupal_add_css("$path/css/dkan_sci_citation.css");
 
     // Used for custom js op to determine environment.
     global $theme;
@@ -49,6 +48,7 @@ function dkan_sci_citation_form_alter(&$form, &$form_state, $form_id) {
     // Check to see if at least one of the paragraphs is a citation.
     foreach (element_children($form['field_metadata_extended'][$field_language]) as $key) {
       $element = $form['field_metadata_extended'][$field_language][$key];
+
       if (isset($element['#bundle']) && $element['#bundle'] === 'sci_citation') {
         $citation = TRUE;
       }
@@ -111,7 +111,7 @@ function _dkan_sci_citation_validate_sci_citation($value, $form_key) {
           form_set_error('field_metadata_extended][' . LANGUAGE_NONE . '][' . $form_key . '][field_dkan_cite_doi', $error_msg);
         }
         else {
-          $citation = _dkan_sci_citation_validate_doi($doi);
+          $citation = _dkan_sci_citation_get_doi_citation($doi);
           $json = json_decode($citation);
           if (json_last_error() === JSON_ERROR_NONE) {
             // Assign citation value.
@@ -148,7 +148,7 @@ function dkan_sci_citation_entity_presave($entity, $type) {
           ? $entity->field_dkan_cite_bibtex[LANGUAGE_NONE][0]['value'] : '';
 
         if (!empty($doi)) {
-          $citation = _dkan_sci_citation_validate_doi($doi);
+          $citation = _dkan_sci_citation_get_doi_citation($doi);
           $json_decode = json_decode($citation);
           $json_save = json_encode($json_decode->message);
           $entity->field_dkan_cite_data[LANGUAGE_NONE][0]['value'] = $json_save;
@@ -219,18 +219,6 @@ function dkan_sci_citation_field_display_alter(&$display, $context) {
   if ($context['field']['field_name'] === 'field_alt_object_id') {
     $context['instance']['label'] = 'PubAg';
   }
-
-  elseif (!empty($params['citation']) && $params['type'] === 'doi') {
-
-    $citation = _dkan_sci_citation_validate_doi($params['citation']);
-    $json_decode = json_decode($citation);
-    $json_save = json_encode($json_decode->message);
-    $processed = _dkan_sci_citation_process_data($json_save);
-
-    print $processed;
-  }
-
-  return '';
 }
 
 /**
@@ -281,15 +269,11 @@ function _dkan_sci_citation_process_query() {
     $json = _dkan_sci_citation_process_bibtex($params['citation']);
     print _dkan_sci_citation_process_data($json);
   }
-
   elseif (!empty($params['citation']) && $params['type'] === 'doi') {
-
-    $citation = _dkan_sci_citation_validate_doi($params['citation']);
+    $citation = _dkan_sci_citation_get_doi_citation($params['citation']);
     $json_decode = json_decode($citation);
     $json_save = json_encode($json_decode->message);
-    $processed = _dkan_sci_citation_process_data($json_save);
-
-    print $processed;
+    print _dkan_sci_citation_process_data($json_save);
   }
 
   return '';
@@ -312,13 +296,22 @@ function _dkan_sci_citation_states($form, &$form_state) {
   return $form;
 }
 
-function _dkan_sci_citation_validate_doi($doi) {
+/**
+ * Query CrossRef for the citation object for a given DOI.
+ *
+ * @param string $doi
+ *   The Digital Object Identifier to retrieve.
+ *
+ * @return mixed json object|string|NULL
+ */
+function _dkan_sci_citation_get_doi_citation($doi) {
   $citation = NULL;
   $client = new RenanBr\CrossRefClient();
 
   try {
     $work = $client->request('works/' . $doi);
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     watchdog_exception('dkan_sci_metadata', $e, $message = NULL, $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL);
   }
 
@@ -389,21 +382,361 @@ function dkan_sci_citation_field_formatter_info() {
  * Implements hook_field_formatter_view().
  */
 function dkan_sci_citation_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-
-  $settings = $display['settings'];
   $element = array();
 
   if ($display['type'] == 'dkan_sci_cite') {
     foreach ($items as $delta => $item) {
-      // Not a json array, so no special formatter.
-      $element[$delta] = array('#markup' => $item['value']);
-      $brace_check = substr($item['value'], 0, 1);
-      // Json array needs the special formatter.
-      if ($brace_check === '{') {
-        $element[$delta] = array('#markup' => _dkan_sci_citation_process_data($item['value']));
+      $json = json_decode($item['value'], TRUE);
+      if (is_array($json)) {
+        // The template expects 'article-journal', not 'journal-article'.
+        if (isset($json['type']) && $json['type'] === 'journal-article') {
+          $json['type'] = 'article-journal';
+        }
+        $formatted_text = _dkan_sci_citation_process_data(json_encode($json));
+        $element[$delta] = array(
+          '#markup' => check_markup($formatted_text, 'html'),
+        );
+      }
+      else {
+        // Not a json array, so no special formatter.
+        $element[$delta] = [
+          '#markup' => check_markup($item['value'], 'html'),
+        ];
       }
     }
   }
 
   return $element;
+}
+/**
+ * Implements hook_block_info().
+ */
+function dkan_sci_citation_block_info() {
+  $blocks['doi_link'] = [
+    'info' => t('Suggested Citation'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  ];
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function dkan_sci_citation_block_view($delta = '') {
+  $block = [];
+  switch ($delta) {
+    case 'doi_link':
+      $content = dkan_sci_citation_create_suggested_citation();
+      $subject = format_plural(count($content), 'Citation', 'Citations');
+      $block = [
+        'subject' => 'Suggested ' . $subject . ':',
+        'content' => $content,
+      ];
+  }
+  return $block;
+}
+
+/**
+ * Creates the Suggest Citation block.
+ *
+ * @return array
+ */
+function dkan_sci_citation_create_suggested_citation() {
+  if (arg(0) === 'node' && is_numeric(arg(1))) {
+    $node = node_load(arg(1));
+  }
+  $citations = [];
+  if (isset($node) && $node->type === 'dataset' && isset($node->field_metadata_extended)) {
+    $metadata_ids = field_get_items('node', $node, 'field_metadata_extended');
+    if (empty($metadata_ids)) {
+      return FALSE;
+    }
+    $paragraphs = dkan_sci_citation_load_dataset_paragraphs($metadata_ids);
+    if (isset($paragraphs['science_metadata'])) {
+      $citation_extras = dkan_sci_citation_get_extras($paragraphs, $node);
+      $original = field_get_items('paragraphs_item', $paragraphs['science_metadata'], 'field_citation_primary');
+      if (is_array($original)) {
+        $citations[] = dkan_sci_citation_get_original_article($original, $citation_extras);
+      }
+      $preferred = field_get_items('paragraphs_item', $paragraphs['science_metadata'], 'field_sci_preferred_dataset_cite');
+      if (is_array($preferred)) {
+        $citations[] = dkan_sci_citation_get_preferred_citation($preferred, $citation_extras);
+      }
+      else {
+        $citations[] = dkan_sci_citation_build_citation($paragraphs, $citation_extras);
+      }
+    }
+  }
+
+  return $citations;
+}
+
+/**
+ * Get the IDs for Extended Metadata Paragraph items.
+ *
+ * @param array $metadata_ids
+ *   An array of Paragraph items.
+ *
+ * @return array
+ *   Returns an array of IDS.
+ */
+function dkan_sci_citation_load_dataset_paragraphs(array $metadata_ids) {
+  $paragraph_ids = [];
+  foreach ($metadata_ids as $id) {
+    $paragraph_ids[] = $id['value'];
+  }
+  return dkan_sci_citation_sort_paragraphs_by_bundle($paragraph_ids);
+}
+
+/**
+ * Sort the Paragraph objects keyed by bundle.
+ *
+ * @param array $paragraph_ids
+ *   An array of Paragraph IDs.
+ *
+ * @return array
+ */
+function dkan_sci_citation_sort_paragraphs_by_bundle(array $paragraph_ids) {
+  $paragraph_entities = entity_load('paragraphs_item', $paragraph_ids);
+  $paragraphs_sorted = [];
+  foreach ($paragraph_entities as $entity) {
+    $paragraphs_sorted[$entity->bundle] = $entity;
+  }
+  return $paragraphs_sorted;
+}
+
+/**
+ * Creats Suggested Citation from Primary Article field.
+ *
+ * @param array $primary
+ *   The Primary Article field.
+ *
+ * @return array
+ */
+function dkan_sci_citation_get_original_article(array $primary, $extras) {
+  $original_citation = [];
+  $articles = [];
+  foreach ($primary as $article) {
+    $articles[] = $article['value'];
+  }
+  $dois = entity_load('paragraphs_item', $articles);
+  foreach ($dois as $doi) {
+    if (isset($doi->field_dkan_cite_data)) {
+      $citation = field_view_field(
+        'paragraphs_item',
+        $doi,
+        'field_dkan_cite_data',
+        [
+          'type' => 'dkan_sci_cite',
+          'label' => 'hidden',
+        ]);
+      $citation[0]['#markup'] = str_replace('<p>', '<p>(original article) ', $citation[0]['#markup']);
+      if (isset($extras['pubag'])) {
+        $pubag = ' ' . l($extras['pubag'], $extras['pubag']) . '</p>';
+        $citation[0]['#markup'] = str_replace('</p>', $pubag, $citation[0]['#markup']);
+      }
+      $original_citation[] = [
+        '#type' => 'markup',
+        '#markup' => render($citation),
+      ];
+    }
+  }
+  return $original_citation;
+}
+
+/**
+ * Gathers extra values to be used in the Citation.
+ *
+ * @param array $paragraphs
+ *   The two main Paragraph objects in an array.
+ * @param object $node
+ *   The Dataset node object.
+ *
+ * @return array
+ */
+function dkan_sci_citation_get_extras(array $paragraphs, $node) {
+  $extras = [
+    'title' => $node->title,
+    'doi_link' => dkan_sci_citation_get_doi_link($paragraphs['science_metadata']),
+    'pubag' => dkan_sci_citation_get_pubag_link($paragraphs['science_metadata']),
+    'publisher' => dkan_sci_citation_get_publisher($node),
+    'published_date' => dkan_sci_citation_get_published_date($node),
+    'dataset_doi' => dkan_sci_citation_get_dataset_doi($paragraphs['science_metadata'], $node),
+  ];
+  return $extras;
+}
+
+/**
+ * Returns published date or Unpublished if the dataset has not been published.
+ *
+ * @param object $node
+ *   The Dataset node object.
+ *
+ * @return string
+ */
+function dkan_sci_citation_get_published_date($node) {
+  if (!empty($node->published_at)) {
+    $published_date = format_date($node->published_at, 'custom', 'Y');
+  }
+  else {
+    $published_date = 'unpublished';
+  }
+  return '(' . $published_date . ')';
+}
+
+/**
+ * Create the render array for the Preferred citation.
+ *
+ * @param array $preferred
+ *   The Preferred Citation field.
+ * @param array $extras
+ *   Extra values that may be needed for the citation.
+ *
+ * @return array
+ */
+function dkan_sci_citation_get_preferred_citation(array $preferred, $extras) {
+  return [
+    '#type' => 'markup',
+    '#markup' => '<p>' . t('(dataset) %preferred', [
+      '%preferred' => $preferred[0]['value'],
+    ]) . '</p>',
+  ];
+}
+
+/**
+ * If we don't have a Preferred Citation we will create the citation here.
+ *
+ * @param array $paragraphs
+ *   The Paragraph objects in an array.
+ * @param array $extras
+ *   Extra values that may be needed for the citation.
+ *
+ * @return array
+ */
+function dkan_sci_citation_build_citation(array $paragraphs, array $extras) {
+  $authors = '';
+  if (isset($paragraphs['science_metadata']->field_sci_author)) {
+    $authors = dkan_sci_citation_get_citation_authors($paragraphs['science_metadata']);
+  }
+  return [
+    '#type' => 'markup',
+    '#markup' => '<p>' . t('(dataset) !authors. !date. !title. !publisher. <a href="@url">!text</a>. Accessed !today.', [
+      '!authors' => $authors,
+      '!date' => $extras['published_date'],
+      '!title' => $extras['title'],
+      '!publisher' => $extras['publisher'],
+      '@url' => $extras['dataset_doi'],
+      '!text' => $extras['dataset_doi'],
+      '!today' => date('Y-m-d'),
+    ]) . '</p>',
+  ];
+}
+
+/**
+ * Get the Authors and creates a semicolon separated list.
+ *
+ * @param \ParagraphsItemEntity $sci_metadata
+ *  The Sci Metadata Paragraph object.
+ *
+ * @return string
+ */
+function dkan_sci_citation_get_citation_authors($sci_metadata) {
+  $paragraph_ids = field_get_items('paragraphs_item', $sci_metadata, 'field_sci_author');
+  $author_ids = [];
+  foreach ($paragraph_ids as $id) {
+    $author_ids[] = $id['value'];
+  }
+  $paragraph_entity = entity_load('paragraphs_item', $author_ids);
+  $authors = [];
+  if (!empty($paragraph_entity)) {
+    foreach ($paragraph_entity as $item) {
+      $authors_name = field_get_items('paragraphs_item', $item, 'field_sci_author_name');
+      $authors[] = $authors_name[0]['value'];
+    }
+  }
+  return implode('; ', $authors);
+}
+
+/**
+ * Get the URL and text for the DOI link.
+ *
+ * @param \ParagraphsItemEntity $metadata
+ *   The Paragraph entity for sci_meta_data.
+ *
+ * @return mixed
+ */
+function dkan_sci_citation_get_doi_link($metadata) {
+  $paragraph_ids = field_get_items('paragraphs_item', $metadata, 'field_citation_primary');
+  $paragraph_entity = entity_load('paragraphs_item', [$paragraph_ids[0]['value']]);
+  if (!empty($paragraph_entity)) {
+    $doi = field_get_items('paragraphs_item', reset($paragraph_entity), 'field_dkan_cite_doi');
+  }
+  $link = NULL;
+  if (isset($doi)) {
+    $link = 'https://doi.org/' . $doi[0]['value'];
+  }
+  return $link;
+}
+
+/**
+ * Creates PubAg link.
+ *
+ * @param \ParagraphsItemEntity $metadata
+ *   The Paragraph entity for sci_meta_data.
+ *
+ * @return string
+ */
+function dkan_sci_citation_get_pubag_link($metadata) {
+  $paragraph_ids = field_get_items('paragraphs_item', $metadata, 'field_citation_primary');
+  $paragraph_entity = entity_load('paragraphs_item', [$paragraph_ids[0]['value']]);
+  if (!empty($paragraph_entity)) {
+    $pubag_values = field_get_items('paragraphs_item', reset($paragraph_entity), 'field_alt_object_id');
+  }
+  $pubag = NULL;
+  if (is_array($pubag_values)) {
+    $pubag = 'http://pubag.nal.usda.gov/catalog/' . $pubag_values[0]['value'];
+  }
+  return $pubag;
+}
+
+/**
+ * Gets a value for the citation Publisher value.
+ *
+ * @param object $node
+ *   The Dataset node object.
+ *
+ * @return string
+ */
+function dkan_sci_citation_get_publisher($node) {
+  $publisher_data = field_get_items('node', $node, 'field_publisher');
+  if (is_array($publisher_data)) {
+    $publisher = $publisher_data[0]['value'];
+  }
+  else {
+    $publisher = 'Ag Data Commons';
+  }
+  return $publisher;
+}
+
+/**
+ * Gets the Dataset DOI value.
+ *
+ * @param \ParagraphsItemEntity $metadata
+ *   The Paragraph entity for sci_meta_data.
+ * @param object $node
+ *   The Dataset node object.
+ *
+ * @return string
+ */
+function dkan_sci_citation_get_dataset_doi($metadata, $node) {
+  $dataset_doi = field_get_items('paragraphs_item', $metadata, 'field_sci_doi');
+  if (is_array($dataset_doi)) {
+    $link = 'https://doi.org/' . $dataset_doi[0]['value'];
+  }
+  else {
+    global $base_url;
+    $link = $base_url . '/' . drupal_get_path_alias('node/' . $node->nid);
+  }
+  return $link;
 }

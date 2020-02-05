@@ -9,9 +9,8 @@
 
 namespace Seboettg\CiteProc\Style;
 use Seboettg\CiteProc\CiteProc;
-use Seboettg\CiteProc\Data\DataList;
 use Seboettg\CiteProc\Rendering\Layout;
-use Seboettg\CiteProc\Rendering\Rendering;
+use Seboettg\CiteProc\Root\Root;
 use Seboettg\CiteProc\Style\Sort\Sort;
 
 
@@ -47,6 +46,7 @@ abstract class StyleElement
      *
      * @param \SimpleXMLElement $node
      * @param Root $parent
+     * @throws \Seboettg\CiteProc\Exception\InvalidStylesheetException
      */
     protected function __construct(\SimpleXMLElement $node, $parent)
     {

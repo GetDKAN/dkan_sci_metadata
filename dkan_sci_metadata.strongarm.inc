@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * dkan_sci_metadata.strongarm.inc

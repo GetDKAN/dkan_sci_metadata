@@ -5,8 +5,6 @@
  */
 
 include_once 'dkan_sci_metadata.features.inc';
-include_once 'includes/DkanSciMetadataAuthor.php';
-include_once 'includes/DkanSciMetadataAuthorOrcid.php';
 
 /**
  * Implements hook_taxonomy_fixtures_vocabulary().
@@ -46,7 +44,7 @@ function dkan_sci_metadata_node_validate($node, $form, &$form_state) {
               // Validate on this paragraphs item.
               _dkan_sci_metadata_validate_sci_author($value, $key);
             }
-            elseif ($value['#bundle'] == 'sci_review') {
+            elseif (isset($value['#bundle']) && $value['#bundle'] == 'sci_review') {
               // Sci_review can contain multiple authors, needs iteration.
               foreach ($value['field_sci_peer_reviewer'][LANGUAGE_NONE] as $reviewer_key => $reviewer_value) {
                 if (is_numeric($reviewer_key)) {
@@ -67,29 +65,40 @@ function dkan_sci_metadata_node_validate($node, $form, &$form_state) {
  */
 function dkan_sci_metadata_entity_presave($entity, $type) {
   // Populate author name field.
-  if ($type == 'paragraphs_item' && $entity->field_name == 'field_metadata_extended') {
-    switch ($entity->bundle) {
-      case 'sci_author':
-        _dkan_sci_metadata_populate_name($entity);
-        break;
+  if ($type == 'paragraphs_item') {
+    if ($entity->field_name == 'field_metadata_extended') {
+      switch ($entity->bundle) {
+        case 'sci_author':
+          _dkan_sci_metadata_populate_name($entity);
+          break;
 
-      case 'sci_review':
-        $reviewers = $entity->field_sci_peer_reviewer[LANGUAGE_NONE];
-        if ($reviewers) {
-          foreach ($reviewers as $reviewer_item) {
-            $reviewer_entity = paragraphs_item_load($reviewer_item['value']);
-            _dkan_sci_metadata_populate_name($reviewer_entity);
+        case 'sci_review':
+          $reviewers = $entity->field_sci_peer_reviewer[LANGUAGE_NONE];
+          if ($reviewers) {
+            foreach ($reviewers as $reviewer_item) {
+              $reviewer_entity = paragraphs_item_load($reviewer_item['value']);
+              _dkan_sci_metadata_populate_name($reviewer_entity);
 
-            $reviewer_entity->save(TRUE);
+              $reviewer_entity->save(TRUE);
+            }
+            // Set Peer Reviewed flag when a reviewer is added.
+            $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 1;
+          } else {
+            $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 0;
           }
-          // Set Peer Reviewed flag when a reviewer is added.
-          $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 1;
-        }
-        else {
-          $entity->field_sci_peer_reviewed[LANGUAGE_NONE][0]['value'] = 0;
-        }
-        break;
+          break;
+      }
     }
+    elseif ($entity->bundle == 'sci_author') {
+      _dkan_sci_metatdata_supertrim_fields($entity, ['field_sci_author_name']);
+    }
+    elseif ($entity->bundle == 'sci_funding_source') {
+      _dkan_sci_metatdata_supertrim_fields($entity, ['field_sci_project_grant_number']);
+    }
+  }
+  elseif ($type == 'node' && $entity->type == 'dataset') {
+    $entity->title = _dkan_sci_metatdata_supertrim($entity->title);
+    _dkan_sci_metatdata_supertrim_fields($entity, ['field_contact_name', 'field_contact_email']);
   }
 }
 
@@ -200,6 +209,41 @@ function _dkan_sci_metadata_populate_name(&$entity) {
         break;
     }
   }
+}
+
+/**
+ * Trim and remove extra spaces from field values.
+ *
+ * @param $entity
+ *   The entity containing fields to trim.
+ * @param array $field_names
+ *  The names of one or more fields to trim.
+ */
+function _dkan_sci_metatdata_supertrim_fields (&$entity, array $field_names) {
+  foreach ($field_names as $field_name) {
+    if (!empty($entity->$field_name) && is_array($entity->$field_name[LANGUAGE_NONE])) {
+      foreach ($entity->$field_name[LANGUAGE_NONE] as &$field) {
+        $field['value'] = _dkan_sci_metatdata_supertrim($field['value']);
+      }
+    }
+  }
+}
+
+/**
+ * Trims string and also replaces multiple spaces with a single space.
+ *
+ * @param string $string
+ *   The string to trim.
+ * @return string
+ *   The trimmed string
+ */
+function _dkan_sci_metatdata_supertrim ($string) {
+  $new_value = preg_replace('/[ ]+/', ' ', $string);
+  if (!empty($new_value)) {
+    $string = $new_value;
+  }
+  $string = trim($string);
+  return $string;
 }
 
 /**

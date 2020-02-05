@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 2.1.7 - 2019-03-24
+
+* bugfix of [PR 64](https://github.com/seboettg/citeproc-php/pull/64) Call to a member function getRangeDelimiter() on null
+* bugfix of [PR 63](https://github.com/seboettg/citeproc-php/pull/63) Don't show "et-al" text for citation witch don't reach et-al number
+
+## 2.1.6 - 2018-10-13
+
+* bugfix of [issue 59](https://github.com/seboettg/citeproc-php/issues/59)
+* bugfix of [issue 58](https://github.com/seboettg/citeproc-php/issues/60)
+
+## 2.1.5 - 2018-09-23
+
+* bugfix of [issue 57](https://github.com/seboettg/citeproc-php/issues/57)
+* bugfix of [issue 58](https://github.com/seboettg/citeproc-php/issues/58)
+
+## 2.1.4 - 2018-07-30
+
+* bugfix of [PR 52](https://github.com/seboettg/citeproc-php/pull/52): Fix locale overrides using inactive language 
+* bugfix of [PR 53](https://github.com/seboettg/citeproc-php/pull/53): Guard against unset variable
+* improvement of [PR 54](https://github.com/seboettg/citeproc-php/pull/54): Add loading of primary dialect
+
+Thanks to [@jonathonwalz](https://github.com/jonathonwalz) for these Pull Requests.
+
+## 2.1.3 - 2018-06-15
+
+* bugfix for issue [50](https://github.com/seboettg/citeproc-php/issues/50): In some cases punctuation in quote did not work.
+
+## 2.1.2 - 2018-04-18
+
+* bugfix for issue [49](https://github.com/seboettg/citeproc-php/issues/49): Stylesheets that used the ``text-case="title"`` option, in combination with some in Slavic (or Serbo-Croatian) language, caused errors that destroyed the entire output. This was caused by the capitalization of non-letter characters.
+
 ## 2.1.1 - 2018-02-08
 * Support for render variables that are using "-short" suffixes, if Text tags have a "form" attribute which is set to "short": ``<text form="short" .../>``. This is used e.g. for abbreviated journal title (container-title-short) and occurred a wrong output in different styles (for example AMA American Medical Association) in previous citeproc-php versions. Have a look at issue [47](https://github.com/seboettg/citeproc-php/issues/47).
 

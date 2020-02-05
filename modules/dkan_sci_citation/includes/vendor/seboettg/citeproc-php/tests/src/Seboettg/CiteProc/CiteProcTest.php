@@ -78,7 +78,7 @@ class CiteProcTest extends TestCase
         $citeProc = new CiteProc($style);
         $cssStyles = $citeProc->renderCssStyles();
         $this->assertTrue(strpos($cssStyles, "csl-entry") !== false);
-        $this->assertTrue(strpos($cssStyles, "text-indent: 45px") !== false);
+        $this->assertTrue(strpos($cssStyles, "text-indent: -2em") !== false);
     }
 
     public function testRenderCssStyleLineAndEntrySpacing()
@@ -210,5 +210,10 @@ class CiteProcTest extends TestCase
         $this->assertEquals(2, count($result));
         $this->assertEquals("[1,3]", $result[0]);
         $this->assertEquals("[2]", $result[1]);
+    }
+
+    public function testOverrideOnlyCurrentLang()
+    {
+        $this->_testRenderTestSuite("locale_OverrideOnlyCurrentLang");
     }
 }

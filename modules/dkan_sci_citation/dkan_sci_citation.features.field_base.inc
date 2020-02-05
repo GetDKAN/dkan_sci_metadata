@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * dkan_sci_citation.features.field_base.inc

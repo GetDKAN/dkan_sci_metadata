@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * dkan_sci_metadata.features.field_instance.inc
@@ -239,7 +240,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'sci_author',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'Enter an identifier for the author if one is available.',
+    'description' => 'Enter the unique identifier for the individual if one is available',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -257,7 +258,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     ),
     'entity_type' => 'paragraphs_item',
     'field_name' => 'field_sci_author_id',
-    'label' => 'Author ID',
+    'label' => 'Identifier',
     'required' => 0,
     'settings' => array(
       'text_processing' => 0,
@@ -280,7 +281,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'sci_author',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'Select the type of Author ID entered.',
+    'description' => 'Choose if the individual has a globally unique identifier. ORCID preferred.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -298,7 +299,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     ),
     'entity_type' => 'paragraphs_item',
     'field_name' => 'field_sci_author_id_type',
-    'label' => 'Author ID Type',
+    'label' => 'ID Type',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -308,11 +309,6 @@ function dkan_sci_metadata_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(
         'apply_chosen' => 0,
-        'autocomplete_deluxe_path' => 'autocomplete_deluxe/taxonomy',
-        'delimiter' => '',
-        'limit' => 10,
-        'min_length' => 0,
-        'size' => 60,
       ),
       'type' => 'options_select',
       'weight' => 1,
@@ -325,7 +321,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'sci_author',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'Last, First e.g. Doe, John',
+    'description' => 'Last Name, First Name, Middle Initial.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -343,7 +339,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     ),
     'entity_type' => 'paragraphs_item',
     'field_name' => 'field_sci_author_name',
-    'label' => 'Author Name',
+    'label' => 'Name',
     'required' => 0,
     'settings' => array(
       'text_processing' => 0,
@@ -818,24 +814,21 @@ function dkan_sci_metadata_field_default_field_instances() {
     'settings' => array(
       'add_mode' => 'button',
       'allowed_bundles' => array(
-        'citation_fields' => -1,
+        'adc_metadata' => -1,
         'sci_author' => -1,
         'sci_citation' => -1,
         'sci_funding_source' => 'sci_funding_source',
-        'sci_purpose_methods' => -1,
-        'sci_review' => -1,
         'science_metadata' => -1,
       ),
       'bundle_weights' => array(
-        'citation_fields' => 2,
+        'adc_metadata' => 8,
         'sci_author' => 4,
         'sci_citation' => 5,
         'sci_funding_source' => 6,
-        'sci_purpose_methods' => 7,
-        'sci_review' => 8,
         'science_metadata' => 3,
       ),
       'default_edit_mode' => 'open',
+      'default_edit_mode_override' => 1,
       'title' => 'Funding Source',
       'title_multiple' => 'Funding Sources',
       'user_register_form' => FALSE,
@@ -947,8 +940,9 @@ function dkan_sci_metadata_field_default_field_instances() {
       'enable_tokens' => 1,
       'rel_remove' => 'default',
       'title' => 'optional',
+      'title_allowed_values' => '',
       'title_label_use_field_label' => 0,
-      'title_maxlength' => 128,
+      'title_maxlength' => 255,
       'title_value' => '',
       'url' => 0,
       'user_register_form' => FALSE,
@@ -972,7 +966,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'hidden',
-        'module' => 'text',
+        'module' => 'dkan_sci_metadata',
         'settings' => array(),
         'type' => 'render_as_link',
         'weight' => 10,
@@ -1068,7 +1062,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'science_metadata',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => '',
+    'description' => 'Explain the intended use and benefits of the dataset. What purpose do you expect the data to serve? For example, precipitation data may be collected to study patterns of groundwater recharge, to validate watershed models, etc.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -1113,7 +1107,7 @@ function dkan_sci_metadata_field_default_field_instances() {
       ),
     ),
     'deleted' => 0,
-    'description' => '',
+    'description' => 'Check this box if your dataset was peer-reviewed.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -1257,7 +1251,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'science_metadata',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'Indicate the most important part of the dataset\'s actual content (e.g. Software Tool, Photograph Collection, Database). This field is only used for DOI submission, and defaults to Dataset if left blank. ',
+    'description' => 'Indicate the most important part of the dataset\'s actual content - choose one of the following: Audiovisual; Collection; Dataset; Event; Image; InteractiveResource; Model; PhysicalObject; Service; Software; Sound; Text; Workflow; Other This field is only used for DOI submission, and defaults to Dataset if left blank.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -1334,8 +1328,9 @@ function dkan_sci_metadata_field_default_field_instances() {
       'enable_tokens' => 1,
       'rel_remove' => 'default',
       'title' => 'optional',
+      'title_allowed_values' => '',
       'title_label_use_field_label' => 0,
-      'title_maxlength' => 128,
+      'title_maxlength' => 255,
       'title_value' => '',
       'url' => 0,
       'user_register_form' => FALSE,
@@ -1357,7 +1352,7 @@ function dkan_sci_metadata_field_default_field_instances() {
     'bundle' => 'science_metadata',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => '',
+    'description' => 'Explain the limitations regarding the dataset\'s usability. For example, estimates may be biased over water, equipment may have malfunctioned during a specified time, data are not appropriate for certain scales, etc.',
     'display' => array(
       'default' => array(
         'label' => 'hidden',
@@ -1395,33 +1390,35 @@ function dkan_sci_metadata_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('An internal link or link to an outside resource that provides additional context to the dataset.');
-  t('Author ID');
-  t('Author ID Type');
-  t('Author Name');
   t('Authors');
   t('Check if this is an organization');
+  t('Check this box if your dataset was peer-reviewed.');
+  t('Choose if the individual has a globally unique identifier. ORCID preferred.');
   t('Citation Methods');
   t('Citation Primary');
   t('Citation Related');
   t('Cites Other Datasets');
   t('Dataset DOI (digital object identifier)');
   t('Enter DOI assigned to this dataset upon publication. Usually this is done by NAL curators unless the dataset has previously been published.');
-  t('Enter an identifier for the author if one is available.');
   t('Enter how you want this dataset to be cited when re-used. Leave blank if you want a dataset citation to be automatically generated for you.');
   t('Enter the citation for a paper that describes methods used to collect or process your data.');
   t('Enter the citation for articles related to this dataset. List only the most relevant one(s).
 ');
   t('Enter the citation for the article that directly describes this dataset (i.e. a data paper). Leave blank if there is no primary article.');
+  t('Enter the unique identifier for the individual if one is available');
   t('Equipment or Software Used');
   t('Explain the intended use and benefits of the dataset. What purpose do you expect the data to serve? For example, precipitation data may be collected to study patterns of groundwater recharge, to validate watershed models, etc.');
   t('Explain the limitations regarding the dataset\'s usability. For example, estimates may be biased over water, equipment may have malfunctioned during a specified time, data are not appropriate for certain scales, etc.');
   t('Funding Sources');
+  t('ID Type');
+  t('Identifier');
   t('If this dataset is an aggregation or adaptation of other data (e.g. raw data linked to derived data), list full citations for those datasets that were used to construct this one. If this is a newer version of a previous dataset, use the "Related to" field below.');
-  t('Indicate the most important part of the dataset\'s actual content (e.g. Software Tool, Photograph Collection, Database). This field is only used for DOI submission, and defaults to Dataset if left blank. ');
+  t('Indicate the most important part of the dataset\'s actual content - choose one of the following: Audiovisual; Collection; Dataset; Event; Image; InteractiveResource; Model; PhysicalObject; Service; Software; Sound; Text; Workflow; Other This field is only used for DOI submission, and defaults to Dataset if left blank.');
   t('Intended Use');
   t('Is Organization');
-  t('Last, First e.g. Doe, John');
+  t('Last Name, First Name, Middle Initial.');
   t('Method Citation');
+  t('Name');
   t('Name the equipment and software used to collect and process the data. Provide make and models, name and version number, and a stable URL for each tool used to collect and process the data. ');
   t('Peer Reviewed');
   t('Preferred Dataset Citation');
@@ -1430,7 +1427,6 @@ function dkan_sci_metadata_field_default_field_instances() {
   t('Related Articles');
   t('Related Content');
   t('Reviewer');
-  t('Select the type of Author ID entered.');
   t('Use Limitations');
 
   return $field_instances;

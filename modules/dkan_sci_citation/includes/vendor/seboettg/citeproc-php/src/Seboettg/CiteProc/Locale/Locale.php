@@ -9,6 +9,7 @@
 
 namespace Seboettg\CiteProc\Locale;
 use Seboettg\CiteProc\StyleSheet;
+use Seboettg\Collection\ArrayList;
 
 /**
  * Class Locale
@@ -38,6 +39,12 @@ class Locale
      */
     private $language;
 
+    /**
+     * Locale constructor.
+     * @param string $lang
+     * @param string $xmlString
+     * @throws \Seboettg\CiteProc\Exception\CiteProcException
+     */
     public function __construct($lang = "en-US", $xmlString = null)
     {
         $this->language = $lang;
@@ -52,12 +59,22 @@ class Locale
         $this->parseXml($this->localeXml);
     }
 
+    /**
+     * @param \SimpleXMLElement $xml
+     * @return $this
+     */
     public function addXml(\SimpleXMLElement $xml)
     {
-        $this->parseXml($xml);
+        $lang = (string) $xml->attributes('http://www.w3.org/XML/1998/namespace')->{'lang'};
+        if (empty($lang) || $this->getLanguage() === $lang || explode('-', $this->getLanguage())[0] === $lang) {
+            $this->parseXml($xml);
+        }
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getLanguage()
     {
         return $this->language;
@@ -75,6 +92,7 @@ class Locale
             throw new \InvalidArgumentException("There is no locale of type \"$type\".");
         }
 
+        /** @var ArrayList $localeList */
         $localeList = $this->{$type};
 
         if (is_null($name)) {

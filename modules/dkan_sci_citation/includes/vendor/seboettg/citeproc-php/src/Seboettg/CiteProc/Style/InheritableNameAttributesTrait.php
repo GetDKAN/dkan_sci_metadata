@@ -216,7 +216,7 @@ trait InheritableNameAttributesTrait
         $parent = $this->parent;
 
         while ($parent != null && $parent instanceof HasParent) {
-            if ($parent instanceof \Seboettg\CiteProc\Style\Macro) {
+            if ($parent instanceof Macro) {
                 return true;
             }
             $parent = $parent->getParent();
