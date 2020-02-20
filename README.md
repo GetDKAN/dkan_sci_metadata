@@ -13,3 +13,5 @@ More documentation coming soon...
 ### DKAN Sci Citation (modules/dkan_sci_citation)
 
 - Support for DOI-based citations. Adds a citation bundle that allows adding via either a free text field or a DOI. If DOI is used, the full citation is retrieved from CrossRef and displayed properly on the dataset page. See module README for details.
+
+This module is the result of a joint partnership between [CivicActions](https://civicactions.com) and the [US Department of Agriculture](https://usda.gov), as part of the development of the [Ag Data Commons](https://data.nal.usda.gov/).
