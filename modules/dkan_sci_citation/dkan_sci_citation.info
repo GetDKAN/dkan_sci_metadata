@@ -1,13 +1,12 @@
 name = DKAN Science Metadata - Citation
 core = 7.x
-package = DKAN
-version = 7.x-1.0
+description = Citation support. IMPORTANT: Read README for installation instructions.
+package = DKAN Science
 dependencies[] = features
 dependencies[] = field_hidden
 dependencies[] = open_data_schema_map
 dependencies[] = paragraphs
 dependencies[] = text
-dependencies[] = usda_content_types
 features[features_api][] = api:2
 features[field_base][] = field_alt_object_id
 features[field_base][] = field_dkan_cite_bibtex
