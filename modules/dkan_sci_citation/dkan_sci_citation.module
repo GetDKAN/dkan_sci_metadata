@@ -680,7 +680,8 @@ function dkan_sci_citation_get_doi_link($metadata) {
 }
 
 /**
- * Creates PubAg link.
+ * Creates PubAg link. This is USDA-specific functionality that should be
+ * moved to a custom module.
  *
  * @param \ParagraphsItemEntity $metadata
  *   The Paragraph entity for sci_meta_data.

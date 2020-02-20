@@ -3,7 +3,7 @@
     // Context here allows your function to run on ajax calls
     attach: function (context, settings) {
 
-      // No other practical way to override this paragraph form label for USDA.
+      // No other practical way to override this paragraph form label.
       // Php would require foreach nesting 3 deep, and paragraphs api is
       // unfriendly (did try, but was unsuccessful via php).
       if (Drupal.settings.citations.themeName === 'ag_data') {
