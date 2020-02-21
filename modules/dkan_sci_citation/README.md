@@ -14,10 +14,11 @@ from the dkan_sci_citation root folder (probably _sites/all/modules/contrib/dkan
 
 ## Adding additional styles
 
-This module supports citation rendering in many common styles. Too add additional styles in .csl format:
+This module supports citation rendering in many common styles. We are working on a better way to change the list of available styles, but currently we recommend: 
 
-- Add item name as indicated by `.csl` file to form options array in `dkan_sci_citation_form()`
-- Add `.csl` file to `./includes/vendor/citation-style-language/styles-distribution`
+- Create a fork of https://github.com/citation-style-language/styles-distribution.git
+- Remove all csl files except the ones you want to use
+- Update this module's composer.json to pull the styles-distribution library from your fork.
 
 ## Attribution
 
