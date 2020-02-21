@@ -25,9 +25,9 @@
                 "version": "1.0.0",
                 "name": "citation-style-language/styles-distribution",
                 "source": {
-                    "url": "https://github.com/citation-style-language/styles-distribution.git",
+                    "url": "https://github.com/getdkan/styles-distribution.git",
                     "type": "git",
-                    "reference": "master"
+                    "reference": "dkan-sci"
                 }
             }
         }
