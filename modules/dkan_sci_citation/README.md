@@ -18,3 +18,7 @@ This module supports citation rendering in many common styles. Too add additiona
 
 - Add item name as indicated by `.csl` file to form options array in `dkan_sci_citation_form()`
 - Add `.csl` file to `./includes/vendor/citation-style-language/styles-distribution`
+
+## Attribution
+
+The citation styling tools used in this module come from [CitationStyles.org](http://citationstyles.org/).
