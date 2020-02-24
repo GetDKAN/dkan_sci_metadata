@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3e94ac47764612f89b2d60dff625e5c",
+    "content-hash": "0c14b9944e7039a07d731a869ca60b53",
     "packages": [
         {
             "name": "audiolabs/bibtexparser",
@@ -368,6 +368,11 @@
                 "url": "https://github.com/citation-style-language/locales.git",
                 "reference": "master"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/citation-style-language/locales/archive/master.zip",
+                "reference": "master"
+            },
             "type": "library"
         },
         {
@@ -375,8 +380,13 @@
             "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/citation-style-language/styles-distribution.git",
-                "reference": "master"
+                "url": "https://github.com/getdkan/styles-distribution.git",
+                "reference": "dkan-sci"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/GetDKAN/styles-distribution/archive/dkan-sci.zip",
+                "reference": "dkan-sci"
             },
             "type": "library"
         },
@@ -1115,6 +1125,55 @@
             "time": "2019-02-13T07:13:15+00:00"
         },
         {
+            "name": "symfony/finder",
+            "version": "v5.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "4176e7cb846fe08f32518b7e0ed8462e2db8d9bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/4176e7cb846fe08f32518b7e0ed8462e2db8d9bb",
+                "reference": "4176e7cb846fe08f32518b7e0ed8462e2db8d9bb",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Finder\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Finder Component",
+            "homepage": "https://symfony.com",
+            "time": "2020-01-04T14:08:26+00:00"
+        },
+        {
             "name": "symfony/polyfill-mbstring",
             "version": "v1.14.0",
             "source": {
@@ -1172,6 +1231,44 @@
                 "shim"
             ],
             "time": "2020-01-13T11:15:53+00:00"
+        },
+        {
+            "name": "topfloor/composer-cleanup-vcs-dirs",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TopFloorTech/composer-cleanup-vcs-dirs.git",
+                "reference": "0158853dd054321b5048108ed5532c4b5e002d1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TopFloorTech/composer-cleanup-vcs-dirs/zipball/0158853dd054321b5048108ed5532c4b5e002d1b",
+                "reference": "0158853dd054321b5048108ed5532c4b5e002d1b",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0.0",
+                "php": ">=5.5",
+                "symfony/finder": "*"
+            },
+            "require-dev": {
+                "composer/composer": "dev-master"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "TopFloor\\ComposerCleanupVcsDirs\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "TopFloor\\ComposerCleanupVcsDirs\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Automatically deletes .git directories in newly installed or updated dependencies.",
+            "time": "2016-10-06T04:35:51+00:00"
         }
     ],
     "packages-dev": [],

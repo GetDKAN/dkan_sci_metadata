@@ -4,7 +4,8 @@
         "citation-style-language/locales": "1.*",
         "citation-style-language/styles-distribution": "1.*",
         "renanbr/crossref-client": "dev-master",
-        "seboettg/citeproc-php": "2.1.1"
+        "seboettg/citeproc-php": "2.1.1",
+        "topfloor/composer-cleanup-vcs-dirs": "^1.0"
     },
     "repositories": [
         {
