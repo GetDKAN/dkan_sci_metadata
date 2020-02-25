@@ -20,7 +20,7 @@ function dkan_sci_citation_field_default_field_instances() {
     'description' => '',
     'display' => array(
       'default' => array(
-        'label' => 'above',
+        'label' => 'hidden',
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_plain',
@@ -103,7 +103,7 @@ function dkan_sci_citation_field_default_field_instances() {
     'description' => 'If no DOI available, enter a valid APA citation using plain text, HTML or Markdown.',
     'display' => array(
       'default' => array(
-        'label' => 'above',
+        'label' => 'hidden',
         'module' => 'dkan_sci_citation',
         'settings' => array(),
         'type' => 'dkan_sci_cite',
@@ -179,11 +179,11 @@ function dkan_sci_citation_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Alternate Object ID');
   t('Bibtex');
+  t('Citation Text');
   t('DOI');
   t('Enter a DOI name in the form: <b>10.1000/123456</b> to autopopulate the article citation.');
   t('Enter the APA citation manually by typing or pasting it into this field. (Examples: <a href="http://www.bibtex.org/Format/" target="_blank">Bibtex Format Guide</a>)');
-  t('Free Text');
-  t('Use this if no DOI is available. You can enter text with HTML and/or markdown or json in a valid citation format.');
+  t('If no DOI available, enter a valid APA citation using plain text, HTML or Markdown.');
 
   return $field_instances;
 }
